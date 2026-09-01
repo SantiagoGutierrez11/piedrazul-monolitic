@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+*.db
+*.sqlite3
+
+# Node / Angular (frontend ya tiene su propio .gitignore, esto es respaldo a nivel raíz)
+node_modules/
+
+# Entornos y credenciales
+.env
+.env.*
+
+# IDEs y OS
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
