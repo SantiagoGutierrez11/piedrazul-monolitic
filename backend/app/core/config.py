@@ -4,7 +4,11 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     app_name: str = "Piedrazul - Monolito Modular"
-    database_url: str = "postgresql+psycopg2://postgres:postgres@localhost:5432/piedrazul"
+    # SQLite por defecto para poder levantar el proyecto sin instalar nada más.
+    # En despliegue se usa PostgreSQL (un schema por módulo) vía la variable DATABASE_URL:
+    # postgresql+psycopg2://postgres:postgres@localhost:5432/piedrazul
+    database_url: str = "sqlite:///./piedrazul.db"
+    cors_origins: list[str] = ["http://localhost:4200"]
     jwt_secret: str = "change-me"  # TODO: reemplazar por Keycloak/JWT real en el Corte 2
     jwt_algorithm: str = "HS256"
 
