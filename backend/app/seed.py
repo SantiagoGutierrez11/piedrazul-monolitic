@@ -1,0 +1,90 @@
+"""
+Carga datos de ejemplo para poder probar el listado de citas y la configuración.
+
+Uso: python -m app.seed
+"""
+from datetime import date, time, timedelta
+
+from app.core.database import SessionLocal, init_db
+from app.modules.appointment.domain.entities import Appointment, AppointmentStatus, ServiceType
+from app.modules.appointment.infrastructure.repository import AppointmentRepository
+from app.modules.configuration.application.service import ConfigurationService
+from app.modules.configuration.domain.entities import DoctorScheduleConfiguration
+from app.modules.configuration.infrastructure.repository import ConfigurationRepository
+from app.modules.medical_staff.domain.entities import Doctor
+from app.modules.medical_staff.infrastructure.repository import DoctorRepository
+
+DOCTORS = [
+    Doctor(doctor_id=1, full_name="Dra. Laura Muñoz", specialty="Medicina General"),
+    Doctor(doctor_id=2, full_name="Dr. Juan Pérez", specialty="Fisioterapia"),
+    Doctor(doctor_id=3, full_name="Dra. Ana Soto", specialty="Quiropraxia"),
+]
+
+SERVICES = [
+    (time(8, 0), time(8, 30), ServiceType.CONSULTA_GENERAL, "Control general", AppointmentStatus.AGENDADA),
+    (time(9, 0), time(9, 30), ServiceType.FISIOTERAPIA, "Terapia de rodilla", AppointmentStatus.AGENDADA),
+    (time(10, 0), time(10, 30), ServiceType.QUIROPRAXIA, "Dolor lumbar", AppointmentStatus.CANCELADA),
+]
+
+
+def _appointments(doctor: Doctor, on_date: date) -> list[Appointment]:
+    return [
+        Appointment(
+            patient_id=100 + doctor.doctor_id * 10 + indice,
+            doctor_id=doctor.doctor_id,
+            doctor_name=doctor.full_name,
+            service_type=servicio,
+            date=on_date,
+            start_time=inicio,
+            end_time=fin,
+            reason=motivo,
+            status=estado,
+        )
+        for indice, (inicio, fin, servicio, motivo, estado) in enumerate(SERVICES, start=1)
+    ]
+
+
+def run() -> None:
+    init_db()
+    db = SessionLocal()
+    try:
+        doctores = DoctorRepository(db)
+        for doctor in DOCTORS:
+            doctores.save(doctor)
+
+        configuracion = ConfigurationService(ConfigurationRepository(db))
+        configuracion.update_appointment_window_weeks(4)
+        for doctor in DOCTORS:
+            configuracion.update_doctor_schedule(
+                doctor.doctor_id,
+                [
+                    DoctorScheduleConfiguration(
+                        doctor_id=doctor.doctor_id,
+                        day_of_week=dia,
+                        start_time=time(8, 0),
+                        end_time=time(12, 0),
+                        interval_minutes=30,
+                    )
+                    for dia in range(1, 6)
+                ],
+            )
+
+        citas = AppointmentRepository(db)
+        hoy = date.today()
+        for on_date in (hoy, hoy + timedelta(days=1)):
+            for doctor in DOCTORS:
+                if citas.find_by_doctor_and_date(doctor.doctor_id, on_date):
+                    continue
+                for cita in _appointments(doctor, on_date):
+                    citas.save(cita)
+
+        print(
+            f"Datos de ejemplo cargados: {len(DOCTORS)} profesionales "
+            f"con citas para {hoy} y {hoy + timedelta(days=1)}."
+        )
+    finally:
+        db.close()
+
+
+if __name__ == "__main__":
+    run()
