@@ -1,0 +1,104 @@
+<div class="listar-citas">
+  <h1>Listado de Citas</h1>
+  <p>Consulta las citas de un médico por fecha, con filtros de servicio y estado.</p>
+
+  <div class="filtros">
+    <label>
+      Fecha
+      <input
+        type="date"
+        [ngModel]="selectedDate()"
+        (ngModelChange)="selectedDate.set($event)"
+        name="fecha"
+      />
+    </label>
+
+    <label>
+      Médico (ID)
+      <input
+        type="number"
+        min="1"
+        [ngModel]="selectedDoctorId()"
+        (ngModelChange)="selectedDoctorId.set($event)"
+        name="doctorId"
+      />
+    </label>
+
+    <label>
+      Servicio
+      <select
+        [ngModel]="selectedServiceType()"
+        (ngModelChange)="selectedServiceType.set($event)"
+        name="serviceType"
+      >
+        <option value="">Todos</option>
+        @for (tipo of serviceTypes; track tipo) {
+          <option [value]="tipo">{{ tipo }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Estado
+      <select
+        [ngModel]="selectedStatus()"
+        (ngModelChange)="selectedStatus.set($event)"
+        name="status"
+      >
+        <option value="">Todos</option>
+        @for (estado of statuses; track estado) {
+          <option [value]="estado">{{ estado }}</option>
+        }
+      </select>
+    </label>
+
+    <button type="button" (click)="buscar()" [disabled]="loading()">
+      {{ loading() ? 'Buscando...' : 'Buscar' }}
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Cargando citas...</p>
+  } @else if (searched() && appointments().length === 0) {
+    <p>No hay citas para los filtros seleccionados.</p>
+  } @else if (appointments().length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Paciente</th>
+          <th>Médico</th>
+          <th>Servicio</th>
+          <th>Motivo</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (apt of pageAppointments(); track apt.appointmentId) {
+          <tr>
+            <td>{{ apt.startTime }} - {{ apt.endTime }}</td>
+            <td>{{ apt.patientId }}</td>
+            <td>{{ apt.doctorName }}</td>
+            <td>{{ apt.serviceType }}</td>
+            <td>{{ apt.reason }}</td>
+            <td>{{ apt.status }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="paginacion">
+        <button type="button" (click)="cambiarPagina(-1)" [disabled]="page() === 1">Anterior</button>
+        <span>Página {{ page() }} de {{ totalPages() }}</span>
+        <button type="button" (click)="cambiarPagina(1)" [disabled]="page() === totalPages()">
+          Siguiente
+        </button>
+      </div>
+    }
+  }
+</div>
