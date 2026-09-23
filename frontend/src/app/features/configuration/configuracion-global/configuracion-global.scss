@@ -1,0 +1,16 @@
+.configuracion-global {
+  max-width: 480px;
+
+  label {
+    display: block;
+    margin: 1rem 0;
+  }
+
+  .ok {
+    color: #1e8449;
+  }
+
+  .error {
+    color: #c0392b;
+  }
+}

@@ -1,0 +1,35 @@
+.configuracion-profesional {
+  max-width: 640px;
+
+  .selector {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  input[type='number'] {
+    width: 5rem;
+  }
+
+  .ok {
+    color: #1e8449;
+  }
+
+  .error {
+    color: #c0392b;
+  }
+}

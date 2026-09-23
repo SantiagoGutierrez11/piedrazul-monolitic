@@ -11,4 +11,9 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/appointments/appointments.routes').then((m) => m.appointmentsRoutes),
   },
+  {
+    path: 'configuration',
+    loadChildren: () =>
+      import('./features/configuration/configuration.routes').then((m) => m.configurationRoutes),
+  },
 ];

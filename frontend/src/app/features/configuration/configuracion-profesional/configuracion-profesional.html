@@ -1,0 +1,90 @@
+<div class="configuracion-profesional">
+  <h1>Configuración de Disponibilidad del Profesional</h1>
+  <p>Define los días de atención, la franja horaria y el intervalo entre citas.</p>
+
+  <div class="selector">
+    <label>
+      Profesional (ID)
+      <input
+        type="number"
+        min="1"
+        [ngModel]="selectedDoctorId()"
+        (ngModelChange)="selectedDoctorId.set($event)"
+        name="doctorId"
+      />
+    </label>
+
+    <button type="button" (click)="cargar()" [disabled]="loading()">
+      {{ loading() ? 'Cargando...' : 'Cargar horario' }}
+    </button>
+  </div>
+
+  @if (loaded()) {
+    <table>
+      <thead>
+        <tr>
+          <th>Atiende</th>
+          <th>Día</th>
+          <th>Desde</th>
+          <th>Hasta</th>
+          <th>Intervalo (min)</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (day of week(); track day.dayOfWeek) {
+          <tr>
+            <td>
+              <input
+                type="checkbox"
+                [ngModel]="day.enabled"
+                (ngModelChange)="actualizarDia(day.dayOfWeek, { enabled: $event })"
+                [name]="'enabled-' + day.dayOfWeek"
+              />
+            </td>
+            <td>{{ day.label }}</td>
+            <td>
+              <input
+                type="time"
+                [disabled]="!day.enabled"
+                [ngModel]="day.startTime"
+                (ngModelChange)="actualizarDia(day.dayOfWeek, { startTime: $event })"
+                [name]="'start-' + day.dayOfWeek"
+              />
+            </td>
+            <td>
+              <input
+                type="time"
+                [disabled]="!day.enabled"
+                [ngModel]="day.endTime"
+                (ngModelChange)="actualizarDia(day.dayOfWeek, { endTime: $event })"
+                [name]="'end-' + day.dayOfWeek"
+              />
+            </td>
+            <td>
+              <input
+                type="number"
+                min="5"
+                step="5"
+                [disabled]="!day.enabled"
+                [ngModel]="day.intervalMinutes"
+                (ngModelChange)="actualizarDia(day.dayOfWeek, { intervalMinutes: $event })"
+                [name]="'interval-' + day.dayOfWeek"
+              />
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <button type="button" (click)="guardar()" [disabled]="saving()">
+      {{ saving() ? 'Guardando...' : 'Guardar horario' }}
+    </button>
+  }
+
+  @if (message()) {
+    <p class="ok">{{ message() }}</p>
+  }
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+</div>
