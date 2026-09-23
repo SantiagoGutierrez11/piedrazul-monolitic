@@ -1,0 +1,27 @@
+<div class="configuracion-global">
+  <h1>Configuración Global del Sistema</h1>
+  <p>Define cuántas semanas hacia adelante se pueden agendar citas.</p>
+
+  <label>
+    Ventana de tiempo (semanas)
+    <input
+      type="number"
+      min="1"
+      max="52"
+      [ngModel]="weeks()"
+      (ngModelChange)="weeks.set($event)"
+      name="weeks"
+    />
+  </label>
+
+  <button type="button" (click)="guardar()" [disabled]="saving()">
+    {{ saving() ? 'Guardando...' : 'Guardar configuración' }}
+  </button>
+
+  @if (message()) {
+    <p class="ok">{{ message() }}</p>
+  }
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+</div>
