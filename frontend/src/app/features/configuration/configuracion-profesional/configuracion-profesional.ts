@@ -1,28 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ConfigurationService } from '../services/configuration.service';
 import { DoctorScheduleItem } from '../models/configuration.model';
 
-interface DayRow {
+interface DayOption {
   dayOfWeek: number;
   label: string;
-  enabled: boolean;
-  startTime: string;
-  endTime: string;
-  intervalMinutes: number;
+  selected: boolean;
 }
 
 const DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-function emptyWeek(): DayRow[] {
+function allDays(): DayOption[] {
   return DAY_LABELS.map((label, index) => ({
     dayOfWeek: index + 1,
     label,
-    enabled: false,
-    startTime: '08:00',
-    endTime: '12:00',
-    intervalMinutes: 30,
+    selected: false,
   }));
 }
 
@@ -35,12 +30,16 @@ function emptyWeek(): DayRow[] {
 })
 export class ConfiguracionProfesional {
   private readonly configurationService = inject(ConfigurationService);
+  private readonly router = inject(Router);
 
   readonly selectedDoctorId = signal<number | null>(null);
-  readonly week = signal<DayRow[]>(emptyWeek());
+  readonly days = signal<DayOption[]>(allDays());
+  readonly startTime = signal('08:00');
+  readonly endTime = signal('18:00');
+  readonly intervalMinutes = signal(30);
+
   readonly loading = signal(false);
   readonly saving = signal(false);
-  readonly loaded = signal(false);
   readonly message = signal('');
   readonly error = signal('');
 
@@ -57,9 +56,8 @@ export class ConfiguracionProfesional {
 
     this.configurationService.getDoctorSchedule(doctorId).subscribe({
       next: (schedules) => {
-        this.week.set(this.merge(schedules));
+        this.aplicar(schedules);
         this.loading.set(false);
-        this.loaded.set(true);
       },
       error: () => {
         this.error.set('No se pudo cargar el horario del profesional.');
@@ -71,16 +69,17 @@ export class ConfiguracionProfesional {
   guardar(): void {
     const doctorId = this.selectedDoctorId();
     if (!doctorId) {
+      this.error.set('Indica el ID del profesional.');
       return;
     }
 
-    const schedules: DoctorScheduleItem[] = this.week()
-      .filter((day) => day.enabled)
+    const schedules: DoctorScheduleItem[] = this.days()
+      .filter((day) => day.selected)
       .map((day) => ({
         dayOfWeek: day.dayOfWeek,
-        startTime: day.startTime,
-        endTime: day.endTime,
-        intervalMinutes: day.intervalMinutes,
+        startTime: this.startTime(),
+        endTime: this.endTime(),
+        intervalMinutes: this.intervalMinutes(),
       }));
 
     this.saving.set(true);
@@ -89,36 +88,41 @@ export class ConfiguracionProfesional {
 
     this.configurationService.updateDoctorSchedule(doctorId, schedules).subscribe({
       next: () => {
-        this.message.set('Horario guardado.');
+        this.message.set('Disponibilidad guardada.');
         this.saving.set(false);
       },
       error: (response) => {
-        this.error.set(response?.error?.message ?? 'No se pudo guardar el horario.');
+        this.error.set(response?.error?.message ?? 'No se pudo guardar la disponibilidad.');
         this.saving.set(false);
       },
     });
   }
 
-  actualizarDia(dayOfWeek: number, cambios: Partial<DayRow>): void {
-    this.week.update((days) =>
-      days.map((day) => (day.dayOfWeek === dayOfWeek ? { ...day, ...cambios } : day)),
+  alternarDia(dayOfWeek: number, selected: boolean): void {
+    this.days.update((days) =>
+      days.map((day) => (day.dayOfWeek === dayOfWeek ? { ...day, selected } : day)),
     );
   }
 
-  private merge(schedules: DoctorScheduleItem[]): DayRow[] {
-    return emptyWeek().map((day) => {
-      const saved = schedules.find((item) => item.dayOfWeek === day.dayOfWeek);
-      if (!saved) {
-        return day;
-      }
-      return {
+  cancelar(): void {
+    this.router.navigate(['/configuration']);
+  }
+
+  private aplicar(schedules: DoctorScheduleItem[]): void {
+    this.days.update((days) =>
+      days.map((day) => ({
         ...day,
-        enabled: true,
-        // El backend devuelve HH:mm:ss; <input type="time"> trabaja con HH:mm.
-        startTime: saved.startTime.slice(0, 5),
-        endTime: saved.endTime.slice(0, 5),
-        intervalMinutes: saved.intervalMinutes,
-      };
-    });
+        selected: schedules.some((item) => item.dayOfWeek === day.dayOfWeek),
+      })),
+    );
+
+    const primero = schedules[0];
+    if (primero) {
+      // El backend guarda la franja por día; el formulario usa una sola franja para
+      // todos los días marcados, así que toma la del primer día configurado.
+      this.startTime.set(primero.startTime.slice(0, 5));
+      this.endTime.set(primero.endTime.slice(0, 5));
+      this.intervalMinutes.set(primero.intervalMinutes);
+    }
   }
 }

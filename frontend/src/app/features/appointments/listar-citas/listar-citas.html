@@ -1,104 +1,136 @@
 <div class="listar-citas">
+  <p class="breadcrumb">Administración / Listado de Citas</p>
   <h1>Listado de Citas</h1>
-  <p>Consulta las citas de un médico por fecha, con filtros de servicio y estado.</p>
+  <p class="subtitle">Busca y filtra todas las citas médicas programadas.</p>
 
-  <div class="filtros">
-    <label>
-      Fecha
+  <div class="card filtros">
+    <div class="filtro">
+      <label for="doctorId">Profesional (ID)</label>
       <input
+        id="doctorId"
+        type="number"
+        min="1"
+        placeholder="Ej. 1"
+        [ngModel]="selectedDoctorId()"
+        (ngModelChange)="selectedDoctorId.set($event)"
+        name="doctorId"
+      />
+    </div>
+
+    <div class="filtro">
+      <label for="fecha">Fecha</label>
+      <input
+        id="fecha"
         type="date"
         [ngModel]="selectedDate()"
         (ngModelChange)="selectedDate.set($event)"
         name="fecha"
       />
-    </label>
+    </div>
 
-    <label>
-      Médico (ID)
-      <input
-        type="number"
-        min="1"
-        [ngModel]="selectedDoctorId()"
-        (ngModelChange)="selectedDoctorId.set($event)"
-        name="doctorId"
-      />
-    </label>
-
-    <label>
-      Servicio
+    <div class="filtro">
+      <label for="serviceType">Tipo de cita</label>
       <select
+        id="serviceType"
         [ngModel]="selectedServiceType()"
         (ngModelChange)="selectedServiceType.set($event)"
         name="serviceType"
       >
-        <option value="">Todos</option>
+        <option value="">Todos los servicios</option>
         @for (tipo of serviceTypes; track tipo) {
-          <option [value]="tipo">{{ tipo }}</option>
+          <option [value]="tipo">{{ tipo.replace('_', ' ') | titlecase }}</option>
         }
       </select>
-    </label>
+    </div>
 
-    <label>
-      Estado
+    <div class="filtro">
+      <label for="status">Estado</label>
       <select
+        id="status"
         [ngModel]="selectedStatus()"
         (ngModelChange)="selectedStatus.set($event)"
         name="status"
       >
-        <option value="">Todos</option>
+        <option value="">Todos los estados</option>
         @for (estado of statuses; track estado) {
-          <option [value]="estado">{{ estado }}</option>
+          <option [value]="estado">{{ estado | titlecase }}</option>
         }
       </select>
-    </label>
+    </div>
 
     <button type="button" (click)="buscar()" [disabled]="loading()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" stroke-linecap="round" />
+      </svg>
       {{ loading() ? 'Buscando...' : 'Buscar' }}
     </button>
   </div>
 
   @if (error()) {
-    <p class="error">{{ error() }}</p>
+    <p class="alert error">{{ error() }}</p>
   }
 
   @if (loading()) {
-    <p>Cargando citas...</p>
+    <div class="card empty-state">Cargando citas...</div>
   } @else if (searched() && appointments().length === 0) {
-    <p>No hay citas para los filtros seleccionados.</p>
+    <div class="card empty-state">No hay citas para los filtros seleccionados.</div>
   } @else if (appointments().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Hora</th>
-          <th>Paciente</th>
-          <th>Médico</th>
-          <th>Servicio</th>
-          <th>Motivo</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (apt of pageAppointments(); track apt.appointmentId) {
+    <div class="card resultados">
+      <table>
+        <thead>
           <tr>
-            <td>{{ apt.startTime }} - {{ apt.endTime }}</td>
-            <td>{{ apt.patientId }}</td>
-            <td>{{ apt.doctorName }}</td>
-            <td>{{ apt.serviceType }}</td>
-            <td>{{ apt.reason }}</td>
-            <td>{{ apt.status }}</td>
+            <th>Hora</th>
+            <th>Paciente</th>
+            <th>Profesional</th>
+            <th>Tipo de cita</th>
+            <th>Motivo</th>
+            <th>Estado</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (apt of pageAppointments(); track apt.appointmentId) {
+            <tr>
+              <td class="hora">{{ apt.startTime.slice(0, 5) }}</td>
+              <td>#{{ apt.patientId }}</td>
+              <td>{{ apt.doctorName }}</td>
+              <td>{{ apt.serviceType.replace('_', ' ') | titlecase }}</td>
+              <td>{{ apt.reason }}</td>
+              <td>
+                <span class="badge badge--{{ apt.status.toLowerCase() }}">
+                  {{ apt.status | titlecase }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
 
-    @if (totalPages() > 1) {
-      <div class="paginacion">
-        <button type="button" (click)="cambiarPagina(-1)" [disabled]="page() === 1">Anterior</button>
-        <span>Página {{ page() }} de {{ totalPages() }}</span>
-        <button type="button" (click)="cambiarPagina(1)" [disabled]="page() === totalPages()">
-          Siguiente
-        </button>
+      <div class="resultados__pie">
+        <span>Total de citas encontradas: <strong>{{ appointments().length }}</strong></span>
+
+        @if (totalPages() > 1) {
+          <span class="paginacion">
+            <button
+              type="button"
+              class="secondary"
+              (click)="cambiarPagina(-1)"
+              [disabled]="page() === 1"
+            >
+              Anterior
+            </button>
+            Página {{ page() }} de {{ totalPages() }}
+            <button
+              type="button"
+              class="secondary"
+              (click)="cambiarPagina(1)"
+              [disabled]="page() === totalPages()"
+            >
+              Siguiente
+            </button>
+          </span>
+        }
       </div>
-    }
+    </div>
   }
 </div>

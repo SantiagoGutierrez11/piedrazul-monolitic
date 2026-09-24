@@ -1,90 +1,101 @@
 <div class="configuracion-profesional">
+  <p class="breadcrumb">Administración / Configuración / Profesional</p>
   <h1>Configuración de Disponibilidad del Profesional</h1>
-  <p>Define los días de atención, la franja horaria y el intervalo entre citas.</p>
+  <p class="subtitle">Defina los días, horarios y duración de las citas para cada profesional.</p>
 
-  <div class="selector">
-    <label>
-      Profesional (ID)
-      <input
-        type="number"
-        min="1"
-        [ngModel]="selectedDoctorId()"
-        (ngModelChange)="selectedDoctorId.set($event)"
-        name="doctorId"
-      />
-    </label>
+  <div class="card">
+    <div class="field">
+      <label for="doctorId">
+        Profesional (ID)
+        <span class="required">*</span>
+      </label>
+      <div class="selector">
+        <input
+          id="doctorId"
+          type="number"
+          min="1"
+          placeholder="Ej. 1"
+          [ngModel]="selectedDoctorId()"
+          (ngModelChange)="selectedDoctorId.set($event)"
+          name="doctorId"
+        />
+        <button type="button" class="secondary" (click)="cargar()" [disabled]="loading()">
+          {{ loading() ? 'Cargando...' : 'Cargar disponibilidad' }}
+        </button>
+      </div>
+    </div>
 
-    <button type="button" (click)="cargar()" [disabled]="loading()">
-      {{ loading() ? 'Cargando...' : 'Cargar horario' }}
-    </button>
-  </div>
-
-  @if (loaded()) {
-    <table>
-      <thead>
-        <tr>
-          <th>Atiende</th>
-          <th>Día</th>
-          <th>Desde</th>
-          <th>Hasta</th>
-          <th>Intervalo (min)</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (day of week(); track day.dayOfWeek) {
-          <tr>
-            <td>
-              <input
-                type="checkbox"
-                [ngModel]="day.enabled"
-                (ngModelChange)="actualizarDia(day.dayOfWeek, { enabled: $event })"
-                [name]="'enabled-' + day.dayOfWeek"
-              />
-            </td>
-            <td>{{ day.label }}</td>
-            <td>
-              <input
-                type="time"
-                [disabled]="!day.enabled"
-                [ngModel]="day.startTime"
-                (ngModelChange)="actualizarDia(day.dayOfWeek, { startTime: $event })"
-                [name]="'start-' + day.dayOfWeek"
-              />
-            </td>
-            <td>
-              <input
-                type="time"
-                [disabled]="!day.enabled"
-                [ngModel]="day.endTime"
-                (ngModelChange)="actualizarDia(day.dayOfWeek, { endTime: $event })"
-                [name]="'end-' + day.dayOfWeek"
-              />
-            </td>
-            <td>
-              <input
-                type="number"
-                min="5"
-                step="5"
-                [disabled]="!day.enabled"
-                [ngModel]="day.intervalMinutes"
-                (ngModelChange)="actualizarDia(day.dayOfWeek, { intervalMinutes: $event })"
-                [name]="'interval-' + day.dayOfWeek"
-              />
-            </td>
-          </tr>
+    <div class="field">
+      <label>Días de atención</label>
+      <div class="dias">
+        @for (day of days(); track day.dayOfWeek) {
+          <label class="dia">
+            <input
+              type="checkbox"
+              [ngModel]="day.selected"
+              (ngModelChange)="alternarDia(day.dayOfWeek, $event)"
+              [name]="'dia-' + day.dayOfWeek"
+            />
+            {{ day.label }}
+          </label>
         }
-      </tbody>
-    </table>
+      </div>
+    </div>
 
-    <button type="button" (click)="guardar()" [disabled]="saving()">
-      {{ saving() ? 'Guardando...' : 'Guardar horario' }}
-    </button>
-  }
+    <div class="field">
+      <label>Franja horaria de atención</label>
+      <div class="franja">
+        <div>
+          <label for="startTime">Hora de inicio <span class="required">*</span></label>
+          <input
+            id="startTime"
+            type="time"
+            [ngModel]="startTime()"
+            (ngModelChange)="startTime.set($event)"
+            name="startTime"
+          />
+        </div>
+        <div>
+          <label for="endTime">Hora de fin <span class="required">*</span></label>
+          <input
+            id="endTime"
+            type="time"
+            [ngModel]="endTime()"
+            (ngModelChange)="endTime.set($event)"
+            name="endTime"
+          />
+        </div>
+      </div>
+    </div>
 
-  @if (message()) {
-    <p class="ok">{{ message() }}</p>
-  }
-  @if (error()) {
-    <p class="error">{{ error() }}</p>
-  }
+    <div class="field intervalo">
+      <label for="interval">
+        Intervalo entre citas (minutos)
+        <span class="required">*</span>
+      </label>
+      <input
+        id="interval"
+        type="number"
+        min="5"
+        step="5"
+        [ngModel]="intervalMinutes()"
+        (ngModelChange)="intervalMinutes.set($event)"
+        name="interval"
+      />
+    </div>
+
+    <div class="acciones">
+      <button type="button" class="secondary" (click)="cancelar()">Cancelar</button>
+      <button type="button" (click)="guardar()" [disabled]="saving()">
+        {{ saving() ? 'Guardando...' : 'Guardar disponibilidad' }}
+      </button>
+    </div>
+
+    @if (message()) {
+      <p class="alert ok">{{ message() }}</p>
+    }
+    @if (error()) {
+      <p class="alert error">{{ error() }}</p>
+    }
+  </div>
 </div>

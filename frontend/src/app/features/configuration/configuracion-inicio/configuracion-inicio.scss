@@ -1,0 +1,71 @@
+.opciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 21rem));
+  gap: 1.5rem;
+}
+
+.opcion {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem;
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    &--global {
+      background: var(--color-primary-soft);
+      color: var(--color-primary);
+    }
+
+    &--profesional {
+      background: var(--color-purple-soft);
+      color: var(--color-purple);
+    }
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    color: var(--color-text-muted);
+    font-size: 0.93rem;
+    margin: 0 0 1.75rem;
+    flex: 1;
+  }
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1.25rem;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--color-primary-dark);
+  }
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+}

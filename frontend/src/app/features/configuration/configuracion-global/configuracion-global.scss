@@ -1,16 +1,13 @@
 .configuracion-global {
-  max-width: 480px;
-
-  label {
-    display: block;
-    margin: 1rem 0;
+  .card {
+    max-width: 46rem;
   }
 
-  .ok {
-    color: #1e8449;
-  }
-
-  .error {
-    color: #c0392b;
+  .acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
   }
 }

@@ -1,0 +1,49 @@
+<div class="configuracion-inicio">
+  <p class="breadcrumb">Administración / Configuración</p>
+  <h1>Configuración del Sistema</h1>
+  <p class="subtitle">Seleccione el tipo de configuración que desea administrar.</p>
+
+  <div class="opciones">
+    <article class="card opcion">
+      <span class="opcion__icon opcion__icon--global" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18" />
+        </svg>
+      </span>
+      <h2>Configuración Global</h2>
+      <p>
+        Permite definir parámetros generales del sistema como la ventana de tiempo en semanas para
+        agendar citas.
+      </p>
+      <a class="boton" routerLink="/configuration/global">
+        Configurar
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </article>
+
+    <article class="card opcion">
+      <span class="opcion__icon opcion__icon--profesional" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="9" cy="8" r="3.5" />
+          <path d="M3 20a6 6 0 0 1 12 0" stroke-linecap="round" />
+          <circle cx="18" cy="15" r="2" />
+          <path d="M18 11.5v1M18 17.5v1M21 15h-1M16 15h-1" stroke-linecap="round" />
+        </svg>
+      </span>
+      <h2>Configuración por Profesional</h2>
+      <p>
+        Permite definir días de atención, franja horaria y el intervalo entre citas para cada
+        profesional.
+      </p>
+      <a class="boton" routerLink="/configuration/profesional">
+        Configurar
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </article>
+  </div>
+</div>
