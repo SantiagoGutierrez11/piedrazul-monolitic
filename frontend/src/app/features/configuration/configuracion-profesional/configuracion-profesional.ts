@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfigurationService } from '../services/configuration.service';
 import { DoctorScheduleItem } from '../models/configuration.model';
+import { MedicalStaffService } from '../../medical-staff/services/medical-staff.service';
+import { Doctor } from '../../medical-staff/models/doctor.model';
 
 interface DayOption {
   dayOfWeek: number;
@@ -28,10 +30,12 @@ function allDays(): DayOption[] {
   templateUrl: './configuracion-profesional.html',
   styleUrl: './configuracion-profesional.scss',
 })
-export class ConfiguracionProfesional {
+export class ConfiguracionProfesional implements OnInit {
   private readonly configurationService = inject(ConfigurationService);
+  private readonly medicalStaffService = inject(MedicalStaffService);
   private readonly router = inject(Router);
 
+  readonly doctors = signal<Doctor[]>([]);
   readonly selectedDoctorId = signal<number | null>(null);
   readonly days = signal<DayOption[]>(allDays());
   readonly startTime = signal('08:00');
@@ -43,10 +47,25 @@ export class ConfiguracionProfesional {
   readonly message = signal('');
   readonly error = signal('');
 
+  ngOnInit(): void {
+    this.medicalStaffService.listDoctors().subscribe({
+      next: (data) => this.doctors.set(data),
+      error: () => this.error.set('No se pudo cargar la lista de profesionales.'),
+    });
+  }
+
+  seleccionarDoctor(doctorId: number | null): void {
+    this.selectedDoctorId.set(doctorId);
+    this.days.set(allDays());
+    if (doctorId) {
+      this.cargar();
+    }
+  }
+
   cargar(): void {
     const doctorId = this.selectedDoctorId();
     if (!doctorId) {
-      this.error.set('Indica el ID del profesional.');
+      this.error.set('Selecciona un profesional.');
       return;
     }
 
@@ -69,7 +88,7 @@ export class ConfiguracionProfesional {
   guardar(): void {
     const doctorId = this.selectedDoctorId();
     if (!doctorId) {
-      this.error.set('Indica el ID del profesional.');
+      this.error.set('Selecciona un profesional.');
       return;
     }
 

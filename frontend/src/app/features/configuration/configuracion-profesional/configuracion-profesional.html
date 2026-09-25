@@ -6,23 +6,25 @@
   <div class="card">
     <div class="field">
       <label for="doctorId">
-        Profesional (ID)
+        Profesional
         <span class="required">*</span>
       </label>
-      <div class="selector">
-        <input
-          id="doctorId"
-          type="number"
-          min="1"
-          placeholder="Ej. 1"
-          [ngModel]="selectedDoctorId()"
-          (ngModelChange)="selectedDoctorId.set($event)"
-          name="doctorId"
-        />
-        <button type="button" class="secondary" (click)="cargar()" [disabled]="loading()">
-          {{ loading() ? 'Cargando...' : 'Cargar disponibilidad' }}
-        </button>
-      </div>
+      <select
+        id="doctorId"
+        [ngModel]="selectedDoctorId()"
+        (ngModelChange)="seleccionarDoctor($event)"
+        name="doctorId"
+      >
+        <option [ngValue]="null">Seleccione un profesional...</option>
+        @for (doctor of doctors(); track doctor.doctorId) {
+          <option [ngValue]="doctor.doctorId">
+            {{ doctor.fullName }} — {{ doctor.specialty }}
+          </option>
+        }
+      </select>
+      @if (loading()) {
+        <small class="hint">Cargando disponibilidad...</small>
+      }
     </div>
 
     <div class="field">

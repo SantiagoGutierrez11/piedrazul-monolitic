@@ -4,17 +4,21 @@
   <p class="subtitle">Busca y filtra todas las citas médicas programadas.</p>
 
   <div class="card filtros">
-    <div class="filtro">
-      <label for="doctorId">Profesional (ID)</label>
-      <input
+    <div class="filtro filtro--profesional">
+      <label for="doctorId">Profesional o terapista</label>
+      <select
         id="doctorId"
-        type="number"
-        min="1"
-        placeholder="Ej. 1"
         [ngModel]="selectedDoctorId()"
         (ngModelChange)="selectedDoctorId.set($event)"
         name="doctorId"
-      />
+      >
+        <option [ngValue]="null">Seleccione un profesional...</option>
+        @for (doctor of doctors(); track doctor.doctorId) {
+          <option [ngValue]="doctor.doctorId">
+            {{ doctor.fullName }} — {{ doctor.specialty }}
+          </option>
+        }
+      </select>
     </div>
 
     <div class="filtro">
