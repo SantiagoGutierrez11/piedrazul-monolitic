@@ -1,27 +1,40 @@
 <div class="configuracion-global">
+  <p class="breadcrumb">Administración / Configuración / Global</p>
   <h1>Configuración Global del Sistema</h1>
-  <p>Define cuántas semanas hacia adelante se pueden agendar citas.</p>
+  <p class="subtitle">
+    Defina la ventana de tiempo en semanas en la que los pacientes pueden agendar citas.
+  </p>
 
-  <label>
-    Ventana de tiempo (semanas)
-    <input
-      type="number"
-      min="1"
-      max="52"
-      [ngModel]="weeks()"
-      (ngModelChange)="weeks.set($event)"
-      name="weeks"
-    />
-  </label>
+  <div class="card">
+    <div class="field">
+      <label for="weeks">
+        Ventana de tiempo para agendar citas (semanas)
+        <span class="required">*</span>
+      </label>
+      <input
+        id="weeks"
+        type="number"
+        min="1"
+        max="52"
+        [ngModel]="weeks()"
+        (ngModelChange)="weeks.set($event)"
+        name="weeks"
+      />
+      <small class="hint">Define cuántas semanas hacia adelante se pueden reservar citas.</small>
+    </div>
 
-  <button type="button" (click)="guardar()" [disabled]="saving()">
-    {{ saving() ? 'Guardando...' : 'Guardar configuración' }}
-  </button>
+    <div class="acciones">
+      <button type="button" class="secondary" (click)="cancelar()">Cancelar</button>
+      <button type="button" (click)="guardar()" [disabled]="saving()">
+        {{ saving() ? 'Guardando...' : 'Guardar configuración' }}
+      </button>
+    </div>
 
-  @if (message()) {
-    <p class="ok">{{ message() }}</p>
-  }
-  @if (error()) {
-    <p class="error">{{ error() }}</p>
-  }
+    @if (message()) {
+      <p class="alert ok">{{ message() }}</p>
+    }
+    @if (error()) {
+      <p class="alert error">{{ error() }}</p>
+    }
+  </div>
 </div>

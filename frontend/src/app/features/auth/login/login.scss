@@ -1,3 +1,18 @@
 .login {
-  max-width: 420px;
+  max-width: 26rem;
+  margin: 3rem auto 0;
+
+  .subtitle {
+    margin-bottom: 1.25rem;
+  }
+
+  .pendiente {
+    color: var(--color-text-muted);
+    background: #f7f9fb;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    margin: 0;
+    font-size: 0.9rem;
+  }
 }
