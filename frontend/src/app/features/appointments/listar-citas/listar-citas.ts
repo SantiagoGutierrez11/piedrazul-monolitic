@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../services/appointment.service';
 import { Appointment, AppointmentStatus, ServiceType } from '../models/appointment.model';
+import { MedicalStaffService } from '../../medical-staff/services/medical-staff.service';
+import { Doctor } from '../../medical-staff/models/doctor.model';
 
 const PAGE_SIZE = 10;
 
@@ -13,8 +15,9 @@ const PAGE_SIZE = 10;
   templateUrl: './listar-citas.html',
   styleUrl: './listar-citas.scss',
 })
-export class ListarCitas {
+export class ListarCitas implements OnInit {
   private readonly appointmentService = inject(AppointmentService);
+  private readonly medicalStaffService = inject(MedicalStaffService);
 
   readonly serviceTypes: ServiceType[] = [
     'CONSULTA_GENERAL',
@@ -24,6 +27,7 @@ export class ListarCitas {
   ];
   readonly statuses: AppointmentStatus[] = ['AGENDADA', 'REAGENDADA', 'ATENDIDA', 'CANCELADA'];
 
+  readonly doctors = signal<Doctor[]>([]);
   readonly selectedDoctorId = signal<number | null>(null);
   readonly selectedDate = signal<string>('');
   readonly selectedServiceType = signal<ServiceType | ''>('');
@@ -43,11 +47,18 @@ export class ListarCitas {
     return this.appointments().slice(start, start + PAGE_SIZE);
   });
 
+  ngOnInit(): void {
+    this.medicalStaffService.listDoctors().subscribe({
+      next: (data) => this.doctors.set(data),
+      error: () => this.error.set('No se pudo cargar la lista de profesionales.'),
+    });
+  }
+
   buscar(): void {
     const doctorId = this.selectedDoctorId();
     const date = this.selectedDate();
     if (!doctorId || !date) {
-      this.error.set('Selecciona una fecha y el ID del médico.');
+      this.error.set('Selecciona un profesional y una fecha.');
       return;
     }
 

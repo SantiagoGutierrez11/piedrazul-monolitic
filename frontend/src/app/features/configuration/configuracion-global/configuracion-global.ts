@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ConfigurationService } from '../services/configuration.service';
 
 @Component({
@@ -12,6 +13,7 @@ import { ConfigurationService } from '../services/configuration.service';
 })
 export class ConfiguracionGlobal implements OnInit {
   private readonly configurationService = inject(ConfigurationService);
+  private readonly router = inject(Router);
 
   readonly weeks = signal(4);
   readonly saving = signal(false);
@@ -23,6 +25,10 @@ export class ConfiguracionGlobal implements OnInit {
       next: (data) => this.weeks.set(data.weeks),
       error: () => this.error.set('No se pudo cargar la configuración actual.'),
     });
+  }
+
+  cancelar(): void {
+    this.router.navigate(['/configuration']);
   }
 
   guardar(): void {

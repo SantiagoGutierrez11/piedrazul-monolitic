@@ -1,17 +1,64 @@
 .agendamiento-autonomo {
+  max-width: 44rem;
+
   .stepper {
-    display: flex;
-    gap: 1rem;
     list-style: none;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0 0 1.5rem;
     padding: 0;
 
-    li.active {
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      padding: 0.4rem 0.8rem 0.4rem 0.4rem;
+      border-radius: 999px;
+    }
+
+    &__num {
+      display: grid;
+      place-items: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: #eef1f5;
+      font-size: 0.78rem;
       font-weight: 600;
     }
+
+    li.active {
+      color: var(--color-primary-dark);
+      background: var(--color-primary-soft);
+
+      .stepper__num {
+        background: var(--color-primary);
+        color: #fff;
+      }
+    }
+
+    li.done .stepper__num {
+      background: var(--color-success-soft);
+      color: var(--color-success);
+    }
+  }
+
+  .pendiente {
+    color: var(--color-text-muted);
+    background: #f7f9fb;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 2rem;
+    text-align: center;
+    margin: 0 0 1.25rem;
   }
 
   .acciones {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
+    justify-content: flex-end;
   }
 }

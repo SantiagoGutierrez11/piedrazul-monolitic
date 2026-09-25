@@ -1,16 +1,26 @@
 <div class="agendamiento-autonomo">
-  <h1>Agendar Cita</h1>
+  <h1>Agendar cita</h1>
+  <p class="subtitle">Reserva autónoma del paciente en cuatro pasos.</p>
 
-  <ol class="stepper">
-    @for (label of steps; track label; let i = $index) {
-      <li [class.active]="i === step()">{{ label }}</li>
-    }
-  </ol>
+  <div class="card">
+    <ol class="stepper">
+      @for (label of steps; track label; let i = $index) {
+        <li [class.active]="i === step()" [class.done]="i < step()">
+          <span class="stepper__num">{{ i + 1 }}</span>
+          <span>{{ label }}</span>
+        </li>
+      }
+    </ol>
 
-  <p>TODO: falta portar cada paso del wizard (servicio, profesional, calendario + slots, confirmación).</p>
+    <p class="pendiente">Este paso todavía no está implementado.</p>
 
-  <div class="acciones">
-    <button type="button" (click)="back()" [disabled]="step() === 0">Anterior</button>
-    <button type="button" (click)="next()" [disabled]="step() === steps.length - 1">Siguiente</button>
+    <div class="acciones">
+      <button type="button" class="secondary" (click)="back()" [disabled]="step() === 0">
+        Anterior
+      </button>
+      <button type="button" (click)="next()" [disabled]="step() === steps.length - 1">
+        Siguiente
+      </button>
+    </div>
   </div>
 </div>
