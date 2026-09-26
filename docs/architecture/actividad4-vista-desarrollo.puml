@@ -1,0 +1,45 @@
+@startuml ComponentesPiedrazul
+title Vista de Desarrollo — Diagrama de Componentes (Modelo 4+1)
+skinparam componentStyle rectangle
+
+actor "Cliente Angular (SPA)" as Cliente
+
+package "Backend - Monolito modular (FastAPI)" {
+  [Appointment] as Appointment
+  [Medical Staff] as MedicalStaff
+  [Configuration] as Configuration
+  [Patient] as Patient
+  [Identity] as Identity
+  [core (Event Bus, Security, DB Session)] as Core
+}
+
+database "Base de datos\n(PostgreSQL, 1 schema por módulo)" as BD
+
+Cliente --> Appointment : HTTP / REST
+Cliente --> Patient : HTTP / REST
+Cliente --> Identity : HTTP / REST
+Cliente --> Configuration : HTTP / REST
+Cliente --> MedicalStaff : HTTP / REST
+
+Appointment ..> MedicalStaff : usa interfaz (disponibilidad)
+Appointment ..> Patient : usa interfaz (valida paciente)
+MedicalStaff ..> Configuration : usa interfaz (horario configurado)
+
+Appointment ..> Core : publica appointment.scheduled
+Configuration ..> Core : publica cambios de horario
+MedicalStaff ..> Core : se suscribe a eventos
+
+Appointment --> BD
+MedicalStaff --> BD
+Configuration --> BD
+Patient --> BD
+Identity --> BD
+
+note bottom of Core
+  Comunicación entre módulos vía
+  interfaces Python (imports directos)
+  y el Event Bus in-process,
+  no HTTP interno.
+end note
+
+@enduml

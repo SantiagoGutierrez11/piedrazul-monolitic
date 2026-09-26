@@ -1,0 +1,27 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Contexto - Sistema de Agendamiento de Citas Médicas Piedrazul (Monolito Modular)
+
+Person(paciente, "Paciente", "Agenda citas desde el portal web y consulta disponibilidad de médicos")
+Person(agendador, "Agendador", "Registra citas manualmente y gestiona la agenda")
+Person(medico, "Médico", "Consulta su agenda de citas")
+Person(admin, "Administrador", "Gestiona configuración del sistema y horarios por profesional")
+
+System(piedrazul, "Sistema de Agendamiento\nPiedrazul", "Monolito modular (FastAPI + Angular) que gestiona citas médicas; los módulos internos se comunican por interfaces de Python y un event bus in-process")
+
+System_Ext(postgres, "PostgreSQL", "Base de datos relacional única, con un schema por módulo, para persistencia de pacientes, médicos, configuración y citas")
+
+System_Ext(correo, "Servicio de Correo", "Proveedor SMTP/API externo usado para enviar recordatorios de citas por correo electrónico")
+
+Rel(paciente, piedrazul, "Agenda citas, consulta disponibilidad", "HTTPS/REST")
+Rel(agendador, piedrazul, "Registra citas manualmente, gestiona pacientes", "HTTPS/REST")
+Rel(medico, piedrazul, "Consulta agenda", "HTTPS/REST")
+Rel(admin, piedrazul, "Configura horarios y parámetros del sistema", "HTTPS/REST")
+
+Rel(piedrazul, postgres, "Lee/Escribe datos", "SQL")
+Rel(piedrazul, correo, "Envía recordatorios de citas", "SMTP/API")
+
+@enduml
