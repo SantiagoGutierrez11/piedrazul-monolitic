@@ -1,0 +1,89 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam class {
+    BackgroundColor White
+    BorderColor #2C3E50
+    ArrowColor  #2980B9
+    FontName    Arial
+}
+skinparam package {
+    BackgroundColor #F4F8FB
+    BorderColor #1168BD
+    FontColor #1168BD
+    FontStyle bold
+}
+title Diagrama de Clases - Nivel 4 (Código) - Módulo Medical Staff\nPatrón: Factory Method
+
+package "Backend API - FastAPI (monolito)" <<Container>> {
+
+  package "Módulo Medical Staff" <<Módulo>> {
+    class MedicalStaffRouter {
+        + list_doctors() : list
+        + get_doctor_schedule(doctor_id : int) : list
+        + get_availability(doctor_id : int, on_date : date) : list<time>
+    }
+
+    abstract class AvailabilityGenerator <<Factory Method - Product>> {
+        + {abstract} generate(doctor_id : int, on_date : date) : list<time>
+    }
+
+    class StandardAvailabilityGenerator <<Concrete Product>> {
+        + generate(doctor_id : int, on_date : date) : list<time>
+    }
+
+    class AvailabilityGeneratorFactory <<Factory Method - Creator>> {
+        + get_availability_generator() : AvailabilityGenerator
+    }
+
+    MedicalStaffRouter ..> AvailabilityGeneratorFactory : pide un generador
+    AvailabilityGenerator <|.. StandardAvailabilityGenerator
+    AvailabilityGeneratorFactory ..> AvailabilityGenerator : crea >
+  }
+
+  package "Módulo Configuration" <<Módulo>> {
+    class DoctorScheduleConfiguration {
+        - doctor_id : int
+        - day_of_week : int
+        - start_time : time
+        - end_time : time
+        - interval_minutes : int
+    }
+  }
+
+  package "Módulo Appointment" <<Módulo>> {
+    class Appointment {
+        - doctor_id : int
+        - date : date
+        - start_time : time
+        - end_time : time
+        - status : AppointmentStatus
+    }
+  }
+
+  package "core (transversal)" <<Módulo>> {
+    class EventBus {
+        + subscribe(event_name : str, handler : Callable) : None
+    }
+  }
+}
+
+StandardAvailabilityGenerator ..> DoctorScheduleConfiguration : lee horario configurado
+StandardAvailabilityGenerator ..> Appointment : descuenta citas ya ocupadas
+MedicalStaffRouter ..> EventBus : se suscribe a\nappointment.scheduled / configuration.updated
+
+note right of AvailabilityGeneratorFactory
+  Hoy siempre devuelve
+  StandardAvailabilityGenerator.
+  Punto de extensión para otra
+  estrategia de generación sin
+  tocar a quien la consume.
+end note
+
+note bottom of StandardAvailabilityGenerator
+  generate() aún no implementado (TODO):
+  horario configurado - intervalo -
+  citas ya ocupadas = slots libres.
+end note
+
+@enduml

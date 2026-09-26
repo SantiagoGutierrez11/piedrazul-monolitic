@@ -1,0 +1,44 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Diagrama de Contenedores - Sistema Piedrazul (Monolito Modular)
+
+Person(paciente, "Paciente", "Agenda citas desde el portal")
+Person(agendador, "Agendador", "Registra citas manualmente")
+Person(medico, "Médico", "Consulta su agenda de citas")
+Person(admin, "Administrador", "Gestiona configuración del sistema")
+
+System_Boundary(piedrazul, "Sistema de Agendamiento Piedrazul") {
+
+  Container(frontend, "Frontend Web", "Angular 22 (standalone components)", "SPA: agendamiento autónomo, listado de citas, configuración, login")
+
+  Container(backend, "Backend API", "FastAPI (Python) - monolito modular", "Expone una única API REST (/api/v1/*). Internamente organiza los módulos appointment, configuration, medical_staff, patient e identity por capas (api/application/domain/infrastructure), comunicados entre sí por interfaces de Python y un event bus in-process (no por red)")
+
+  ContainerDb(db, "Base de Datos", "PostgreSQL", "Una sola instancia, un schema por módulo")
+}
+
+System_Ext(correo, "Servicio de Correo", "SMTP/API externo para recordatorios de citas (pendiente de integrar)")
+
+Rel(paciente, frontend, "Usa", "HTTPS")
+Rel(agendador, frontend, "Usa", "HTTPS")
+Rel(medico, frontend, "Usa", "HTTPS")
+Rel(admin, frontend, "Usa", "HTTPS")
+
+Rel(frontend, backend, "Consume API REST", "HTTPS/JSON")
+
+Rel(backend, db, "Lee/Escribe (SQLAlchemy)", "SQL")
+Rel(backend, correo, "Envía recordatorios", "SMTP/API")
+
+note right of backend
+  A diferencia de los microservicios originales,
+  aquí NO hay API Gateway ni contenedores
+  separados por módulo: todos corren en el
+  mismo proceso. La única interfaz REST
+  expuesta es la del backend hacia el frontend;
+  la comunicación entre módulos internos
+  (p. ej. configuration -> medical_staff cuando
+  cambia un horario) es en memoria vía el
+  event bus, no HTTP.
+end note
+
+@enduml
