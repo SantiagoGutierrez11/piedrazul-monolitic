@@ -1,0 +1,40 @@
+@startuml DiagramaDeDespliegue
+skinparam componentStyle uml2
+
+' ==========================================
+' NODOS Y DISPOSITIVOS (Infraestructura)
+' ==========================================
+node "<<device>>\nDispositivo Cliente" as Cliente {
+  node "<<executionEnvironment>>\nNavegador Web" as Navegador {
+    artifact "Frontend App (Angular - Bundle JS/HTML)" as AngularApp <<artifact>>
+  }
+}
+
+cloud "<<cloud>>\nCloud Provider" {
+  node "<<device>>\nServidor de Aplicaciones Backend" as AppServer {
+    node "<<executionEnvironment>>\nPython / Uvicorn Server" as PythonEnv {
+      artifact "FastAPI REST App (.py)" as BackendApp <<artifact>>
+    }
+  }
+
+  node "<<device>>\nServidor de Base de Datos" as DBServer {
+    node "<<executionEnvironment>>\nDBMS (PostgreSQL / MySQL)" as DBMS {
+      database "Base de Datos CitasMédicas" as DB
+    }
+  }
+}
+
+cloud "<<external system>>\nServidor de Correo" as MailServer {
+  node "<<executionEnvironment>>\nMail Service API / SMTP" as Engine {
+    component "Servicio de Envíos Email" as MailComponent
+  }
+}
+
+' ==========================================
+' CONEXIONES Y PROTOCOLOS
+' ==========================================
+AngularApp -- BackendApp : HTTPS / REST (JSON)
+BackendApp -- DB : SQLAlchemy / AsyncPG (Puerto 5432/3306)
+BackendApp -- MailComponent : HTTPS / SMTPS (fastapi-mail)
+
+@enduml

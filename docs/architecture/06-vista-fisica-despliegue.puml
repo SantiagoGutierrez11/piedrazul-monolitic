@@ -1,0 +1,62 @@
+@startuml
+title Actividad 6 - Vista Física (Diagrama de Despliegue) - Piedrazul Monolito Modular
+
+skinparam node {
+    BackgroundColor White
+    BorderColor #2C3E50
+}
+
+node "Dispositivo del usuario" {
+    artifact "Navegador Web" as browser
+}
+
+cloud "Proveedor Cloud (ej. AWS / Azure / GCP)" {
+
+    node "Hosting Estático / CDN" as cdn {
+        artifact "Frontend Angular\n(build de producción)" as frontend_artifact
+    }
+
+    node "Servidor de Aplicaciones\n(VM o contenedor)" as app_server {
+        artifact "Backend FastAPI\n(monolito modular, Uvicorn/Gunicorn)" as backend_artifact
+    }
+
+    node "Servicio de Base de Datos Administrado" as db_server {
+        database "PostgreSQL" as postgres {
+            folder "schema: appointment"
+            folder "schema: configuration"
+            folder "schema: medical_staff"
+            folder "schema: patient"
+            folder "schema: identity"
+        }
+    }
+}
+
+cloud "Proveedor de Correo Externo" {
+    node "Servidor SMTP / API de Email" as mail_server {
+        artifact "Servicio de envío\n(ej. SendGrid, SMTP Gmail)" as mail_artifact
+    }
+}
+
+browser --> cdn : HTTPS\n(descarga SPA)
+browser --> app_server : HTTPS/REST/JSON\n(/api/v1/*)
+app_server --> db_server : SQL\n(SQLAlchemy, TCP 5432, un schema por módulo)
+app_server --> mail_server : SMTP / HTTPS API\n(recordatorios de citas - pendiente)
+
+note right of app_server
+  Un único proceso despliega todo
+  el backend (monolito modular):
+  los módulos appointment,
+  configuration, medical_staff,
+  patient e identity corren en el
+  mismo servidor, no en nodos
+  separados como en microservicios.
+end note
+
+note right of postgres
+  Una sola instancia física,
+  con un schema por módulo
+  (decisión de arquitectura,
+  ver README del proyecto).
+end note
+
+@enduml
