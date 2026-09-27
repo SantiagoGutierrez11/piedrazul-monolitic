@@ -1,4 +1,6 @@
 """Fixtures compartidas: base de datos SQLite en memoria, cliente HTTP de pruebas y autenticación."""
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -9,6 +11,7 @@ from app.core.database import Base, get_db
 from app.core.security import CurrentUser, Role, get_current_user, get_token_verifier
 from app.main import app
 from app.modules.identity.infrastructure.keycloak_provider import get_identity_provider
+from app.shared.clock import get_clock
 from tests.auth_helpers import FakeIdentityProvider, TokenFactory
 
 
@@ -76,3 +79,26 @@ def identity_provider(real_tokens):
     provider = FakeIdentityProvider(real_tokens)
     app.dependency_overrides[get_identity_provider] = lambda: provider
     return provider
+
+
+class FixedClock:
+    def __init__(self, now: datetime):
+        self._now = now
+
+    def now(self) -> datetime:
+        return self._now
+
+    def set(self, now: datetime) -> None:
+        self._now = now
+
+
+# Lunes 9 de marzo de 2026, antes de que abra la consulta. En la ventana por defecto (4 semanas)
+# caen los festivos del 23 de marzo (San José) y del 2 y 3 de abril (Semana Santa).
+MONDAY_MORNING = datetime(2026, 3, 9, 7, 0)
+
+
+@pytest.fixture()
+def clock(client):
+    fixed = FixedClock(MONDAY_MORNING)
+    app.dependency_overrides[get_clock] = lambda: fixed
+    return fixed
