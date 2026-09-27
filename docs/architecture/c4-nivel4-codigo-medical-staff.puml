@@ -81,9 +81,10 @@ note right of AvailabilityGeneratorFactory
 end note
 
 note bottom of StandardAvailabilityGenerator
-  generate() aún no implementado (TODO):
-  horario configurado - intervalo -
-  citas ya ocupadas = slots libres.
+  generate() descuenta de la jornada las citas
+  activas del profesional en esa fecha. La jornada
+  todavía está fijada en el código: debe leerse
+  del módulo Configuration.
 end note
 
 @enduml
