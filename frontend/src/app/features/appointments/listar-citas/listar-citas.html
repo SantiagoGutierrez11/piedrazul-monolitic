@@ -85,10 +85,10 @@
         <thead>
           <tr>
             <th>Hora</th>
-            <th>Paciente</th>
+            <th>Nombre del paciente</th>
+            <th>Teléfono de contacto</th>
             <th>Profesional</th>
             <th>Tipo de cita</th>
-            <th>Motivo</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -96,10 +96,10 @@
           @for (apt of pageAppointments(); track apt.appointmentId) {
             <tr>
               <td class="hora">{{ apt.startTime.slice(0, 5) }}</td>
-              <td>#{{ apt.patientId }}</td>
+              <td>{{ apt.patientName ?? 'Paciente sin registrar' }}</td>
+              <td>{{ apt.patientPhone ?? '—' }}</td>
               <td>{{ apt.doctorName }}</td>
               <td>{{ apt.serviceType.replace('_', ' ') | titlecase }}</td>
-              <td>{{ apt.reason }}</td>
               <td>
                 <span class="badge badge--{{ apt.status.toLowerCase() }}">
                   {{ apt.status | titlecase }}
