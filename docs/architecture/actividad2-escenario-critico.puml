@@ -1,0 +1,45 @@
+@startuml EscenarioCriticoAgendarCita
+title Vista de Escenarios (+1) — Escenario crítico: "Paciente agenda una cita médica"\nFlujo normal y flujo alternativo (horario no disponible)
+
+actor "Paciente" as P
+participant "Frontend Angular\n(asistente de agendamiento)" as UI
+participant "Módulo Medical Staff\n(disponibilidad)" as MS
+participant "Módulo Configuration\n(horario del profesional)" as CFG
+participant "Módulo Appointment\n(plantilla + validadores)" as APP
+database "PostgreSQL" as BD
+
+P -> UI : Selecciona tipo de servicio y profesional
+UI -> MS : GET /api/v1/medical/availability?doctor_id&date
+MS -> CFG : Consulta horario configurado del profesional
+CFG --> MS : Días de atención, franja e intervalo
+MS -> BD : Consulta citas activas del profesional en la fecha
+BD --> MS : Citas ocupadas
+MS --> UI : Franjas libres
+
+group Flujo normal
+  P -> UI : Selecciona una franja libre y confirma
+  UI -> APP : POST /api/v1/appointments/autonomous
+  APP -> APP : Valida datos y fecha futura
+  APP -> APP : Valida conflicto de horario
+  APP -> APP : Valida límite de citas activas
+  APP -> BD : INSERT de la cita (estado AGENDADA)
+  BD --> APP : Cita registrada
+  APP --> UI : 201 Created con los datos de la cita
+  UI --> P : Confirmación con fecha, hora y profesional
+end
+
+group Flujo alternativo: horario no disponible
+  P -> UI : Selecciona una franja que otro usuario acaba de reservar
+  UI -> APP : POST /api/v1/appointments/autonomous
+  APP -> APP : Valida conflicto de horario
+  APP --> UI : 409 con el mensaje de la regla incumplida
+  UI --> P : "Ese horario ya no está disponible", vuelve al paso de selección
+end
+
+note over APP
+  Las validaciones se ejecutan en cadena
+  desde AppointmentSchedulingTemplate antes
+  de guardar; si una falla, no se persiste nada.
+end note
+
+@enduml

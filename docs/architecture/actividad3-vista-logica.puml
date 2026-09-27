@@ -1,0 +1,111 @@
+@startuml VistaLogicaPiedrazul
+title Vista Lógica — Diagrama de Clases del Dominio (Modelo 4+1)
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    BorderColor #2C3E50
+    ArrowColor #2980B9
+}
+skinparam package {
+    BackgroundColor #F4F8FB
+    BorderColor #1168BD
+    FontColor #1168BD
+    FontStyle bold
+}
+
+package "Módulo Patient" {
+  class Patient {
+    - patient_id : int
+    - first_name : str
+    - last_name : str
+    - phone : str
+    --
+    + full_name : str
+  }
+}
+
+package "Módulo Medical Staff" {
+  class Doctor {
+    - doctor_id : int
+    - full_name : str
+    - specialty : str
+    - active : bool
+  }
+}
+
+package "Módulo Configuration" {
+  class DoctorScheduleConfiguration {
+    - id : int
+    - doctor_id : int
+    - day_of_week : int
+    - start_time : time
+    - end_time : time
+    - interval_minutes : int
+  }
+
+  class SystemParameter {
+    - key : str
+    - value : str
+    - description : str
+  }
+}
+
+package "Módulo Appointment" {
+  class Appointment {
+    - appointment_id : int
+    - patient_id : int
+    - doctor_id : int
+    - doctor_name : str
+    - service_type : ServiceType
+    - date : date
+    - start_time : time
+    - end_time : time
+    - reason : str
+    - notes : str
+    - status : AppointmentStatus
+    --
+    + schedule() : None
+    + reschedule() : None
+    + cancel() : None
+    + mark_as_attended() : None
+  }
+
+  enum ServiceType {
+    CONSULTA_GENERAL
+    FISIOTERAPIA
+    QUIROPRAXIA
+    TERAPIA_NEURAL
+  }
+
+  enum AppointmentStatus {
+    AGENDADA
+    REAGENDADA
+    ATENDIDA
+    CANCELADA
+  }
+}
+
+Patient "1" -- "0..*" Appointment : solicita >
+Doctor "1" -- "0..*" Appointment : atiende >
+Doctor "1" -- "0..7" DoctorScheduleConfiguration : tiene configurado >
+Appointment "1" --> "1" ServiceType
+Appointment "1" --> "1" AppointmentStatus
+
+note bottom of Appointment
+  La relación con Patient y Doctor se
+  materializa por identificador (patient_id,
+  doctor_id), no por referencia directa:
+  cada módulo es dueño de sus propias tablas
+  y los datos del paciente se resuelven a
+  través de la interfaz pública del módulo
+  Patient (PatientDirectory).
+end note
+
+note right of SystemParameter
+  Parámetro global del sistema; hoy
+  almacena la ventana de agendamiento
+  en semanas.
+end note
+
+@enduml

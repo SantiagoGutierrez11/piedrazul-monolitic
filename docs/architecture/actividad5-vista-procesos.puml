@@ -1,0 +1,44 @@
+@startuml SecuenciaConcurrenciaCitas
+title Vista de Procesos — Diagrama de Secuencia (Modelo 4+1)\nDos solicitudes simultáneas sobre el mismo horario
+
+actor "Agendador 1" as A1
+actor "Agendador 2" as A2
+participant "Módulo Appointment" as Citas
+database "PostgreSQL" as BD
+
+A1 -> Citas : Agendar cita Dr. X, 10:00
+A2 -> Citas : Agendar cita Dr. X, 10:00
+
+note over A1, A2
+  Ambas solicitudes llegan
+  casi al mismo tiempo.
+end note
+
+Citas -> Citas : Valida conflicto de horario\n(solicitud 1)
+Citas -> Citas : Valida conflicto de horario\n(solicitud 2)
+
+note over Citas
+  Sin control adicional, las dos solicitudes
+  podrían superar la validación antes de que
+  la otra registre su reserva: condición de
+  carrera "verificar-luego-actuar".
+end note
+
+Citas -> BD : INSERT de la cita (solicitud 1)
+BD --> Citas : Cita guardada
+
+Citas -> BD : INSERT de la cita (solicitud 2)
+BD --> Citas : Error: restricción única violada\n(doctor_id, date, start_time)
+
+Citas --> A1 : Cita confirmada
+Citas --> A2 : "Ese horario ya no está disponible"
+
+note right of BD
+  La restricción de unicidad sobre
+  (doctor_id, date, start_time) hace
+  que el INSERT sea la operación que
+  decide, de forma atómica, cuál de
+  las dos reservas queda registrada.
+end note
+
+@enduml
