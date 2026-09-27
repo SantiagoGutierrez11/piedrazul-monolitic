@@ -16,6 +16,14 @@ class DoctorRepository:
         ).all()
         return [self._to_entity(row) for row in rows]
 
+    def find_active_by_specialty(self, specialty: str) -> list[Doctor]:
+        rows = self._db.scalars(
+            select(DoctorModel)
+            .where(DoctorModel.active.is_(True), DoctorModel.specialty == specialty)
+            .order_by(DoctorModel.full_name)
+        ).all()
+        return [self._to_entity(row) for row in rows]
+
     def find_by_id(self, doctor_id: int) -> Doctor | None:
         row = self._db.get(DoctorModel, doctor_id)
         return self._to_entity(row) if row else None
