@@ -1,17 +1,15 @@
-"""
-Variante de agendamiento para el autoagendamiento del paciente.
-
-Punto de extensión separado de `ManualAppointmentScheduling` para poder agregar las
-reglas anti-fraude que necesita el autoagendamiento (validación de identidad, límite de
-creación masiva, verificación básica de datos) sin afectar el flujo manual.
-
-TODO: implementar esas reglas anti-fraude (propias o en un validador aparte); por ahora
-el comportamiento es igual al manual.
-"""
 from app.modules.appointment.application.scheduling.base import AppointmentSchedulingTemplate
 from app.modules.appointment.domain.entities import Appointment
+from app.modules.appointment.domain.validators.base import AppointmentValidator
+from app.modules.appointment.infrastructure.repository import AppointmentRepository
 
 
 class AutonomousAppointmentScheduling(AppointmentSchedulingTemplate):
+    """Agendamiento autónomo con reglas anti-fraude e inyección de validadores."""
+
+    def __init__(self, repository: AppointmentRepository, validators: list[AppointmentValidator]):
+        super().__init__(repository, validators)
+
     def _assign_status(self, appointment: Appointment) -> None:
+        # Transición explícita para agendamiento autónomo
         appointment.schedule()

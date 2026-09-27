@@ -1,13 +1,12 @@
-"""Módulo de apoyo consumido por el agendamiento (disponibilidad) y el listado de citas
-(selector de médico). Relacionado con `configuration` para los horarios por profesional.
-"""
 from datetime import date
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.modules.appointment.infrastructure.repository import AppointmentRepository
 from app.modules.medical_staff.api.schemas import DoctorResponse
+from app.modules.medical_staff.domain.factory.availability_generator import get_availability_generator
 from app.modules.medical_staff.infrastructure.repository import DoctorRepository
 
 router = APIRouter()
@@ -29,6 +28,11 @@ def get_doctor_schedule(doctor_id: int):
 
 
 @router.get("/availability")
-def get_availability(doctor_id: int, date: date):
-    """TODO: usar get_availability_generator() de domain/factory/availability_generator.py."""
-    return []
+def get_availability(doctor_id: int, date: date, db: Session = Depends(get_db)):
+    generator = get_availability_generator(AppointmentRepository(db))
+    slots = generator.generate(doctor_id=doctor_id, on_date=date)
+    return {
+        "doctor_id": doctor_id,
+        "date": date,
+        "available_slots": [s.strftime("%H:%M") for s in slots],
+    }
