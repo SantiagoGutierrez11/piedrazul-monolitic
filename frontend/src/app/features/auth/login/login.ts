@@ -4,7 +4,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthUser } from '../../../core/auth/auth.models';
 import { AuthService } from '../../../core/auth/auth.service';
-import { mensajeDeError } from '../error-messages';
+import { mensajeDeError } from '../../../shared/error-messages';
 
 type Perfil = 'paciente' | 'profesional';
 
