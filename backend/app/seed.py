@@ -5,6 +5,8 @@ Uso: python -m app.seed
 """
 from datetime import date, time, timedelta
 
+from sqlalchemy import text
+
 from app.core.database import SessionLocal, init_db
 from app.modules.appointment.domain.entities import Appointment, AppointmentStatus, ServiceType
 from app.modules.appointment.infrastructure.repository import AppointmentRepository
@@ -22,8 +24,19 @@ DOCTORS = [
     Doctor(doctor_id=3, full_name="Dra. Ana Soto", specialty="Quiropraxia"),
 ]
 
+# Cuenta paciente@piedrazul.com del realm de Keycloak (keycloak/realm-piedrazul.json).
+DEMO_PATIENT_USER_ID = "d2f6b958-6c4e-4a17-b3d9-8a1c5e7f2b04"
+
 PATIENTS = [
-    Patient(patient_id=1, first_name="María", last_name="García López", phone="+57 300 123 4567"),
+    Patient(
+        patient_id=1,
+        first_name="María",
+        last_name="García",
+        second_last_name="López",
+        phone="+57 300 123 4567",
+        email="paciente@piedrazul.com",
+        user_id=DEMO_PATIENT_USER_ID,
+    ),
     Patient(patient_id=2, first_name="Carlos", last_name="Rodríguez", phone="+57 310 987 6543"),
     Patient(patient_id=3, first_name="Laura", last_name="Sánchez", phone="+57 320 456 7890"),
     Patient(patient_id=4, first_name="Roberto", last_name="Díaz", phone="+57 301 222 3344"),
@@ -60,6 +73,20 @@ def _appointments(doctor: Doctor, on_date: date) -> list[Appointment]:
     ]
 
 
+def _sync_patient_sequence(db) -> None:
+    """Los pacientes de ejemplo se insertan con id fijo; en PostgreSQL la secuencia debe
+    avanzar para que los pacientes que se registren después no choquen con esos ids."""
+    if db.get_bind().dialect.name != "postgresql":
+        return
+    db.execute(
+        text(
+            "SELECT setval(pg_get_serial_sequence('patient.patient', 'patient_id'), "
+            "(SELECT MAX(patient_id) FROM patient.patient))"
+        )
+    )
+    db.commit()
+
+
 def run() -> None:
     init_db()
     db = SessionLocal()
@@ -71,6 +98,7 @@ def run() -> None:
         pacientes = PatientRepository(db)
         for paciente in PATIENTS:
             pacientes.save(paciente)
+        _sync_patient_sequence(db)
 
         configuracion = ConfigurationService(ConfigurationRepository(db))
         configuracion.update_appointment_window_weeks(4)
