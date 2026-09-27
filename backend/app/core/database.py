@@ -38,6 +38,12 @@ def get_db():
 
 def init_db() -> None:
     """Crea los schemas de cada módulo y las tablas declaradas. Se llama al arrancar la app."""
+    # Import local: registra los modelos en Base.metadata sin crear imports circulares.
+    from app.modules.appointment.infrastructure import models as appointment_models  # noqa: F401
+    from app.modules.configuration.infrastructure import models as configuration_models  # noqa: F401
+    from app.modules.medical_staff.infrastructure import models as medical_staff_models  # noqa: F401
+    from app.modules.patient.infrastructure import models as patient_models  # noqa: F401
+
     if SUPPORTS_SCHEMAS:
         with engine.begin() as connection:
             for schema in MODULE_SCHEMAS:

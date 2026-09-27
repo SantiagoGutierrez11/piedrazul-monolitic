@@ -13,11 +13,25 @@ from app.modules.configuration.domain.entities import DoctorScheduleConfiguratio
 from app.modules.configuration.infrastructure.repository import ConfigurationRepository
 from app.modules.medical_staff.domain.entities import Doctor
 from app.modules.medical_staff.infrastructure.repository import DoctorRepository
+from app.modules.patient.domain.entities import Patient
+from app.modules.patient.infrastructure.repository import PatientRepository
 
 DOCTORS = [
     Doctor(doctor_id=1, full_name="Dra. Laura Muñoz", specialty="Medicina General"),
     Doctor(doctor_id=2, full_name="Dr. Juan Pérez", specialty="Fisioterapia"),
     Doctor(doctor_id=3, full_name="Dra. Ana Soto", specialty="Quiropraxia"),
+]
+
+PATIENTS = [
+    Patient(patient_id=1, first_name="María", last_name="García López", phone="+57 300 123 4567"),
+    Patient(patient_id=2, first_name="Carlos", last_name="Rodríguez", phone="+57 310 987 6543"),
+    Patient(patient_id=3, first_name="Laura", last_name="Sánchez", phone="+57 320 456 7890"),
+    Patient(patient_id=4, first_name="Roberto", last_name="Díaz", phone="+57 301 222 3344"),
+    Patient(patient_id=5, first_name="Ana", last_name="Martínez", phone="+57 315 555 1122"),
+    Patient(patient_id=6, first_name="Jorge", last_name="Ramírez", phone="+57 312 777 8899"),
+    Patient(patient_id=7, first_name="Sofía", last_name="Torres", phone="+57 318 444 5566"),
+    Patient(patient_id=8, first_name="Andrés", last_name="Gómez", phone="+57 305 666 7788"),
+    Patient(patient_id=9, first_name="Valentina", last_name="Castro", phone="+57 317 999 0011"),
 ]
 
 SERVICES = [
@@ -28,9 +42,11 @@ SERVICES = [
 
 
 def _appointments(doctor: Doctor, on_date: date) -> list[Appointment]:
+    """Cada profesional atiende a tres pacientes distintos en la misma jornada."""
+    primer_paciente = (doctor.doctor_id - 1) * len(SERVICES)
     return [
         Appointment(
-            patient_id=100 + doctor.doctor_id * 10 + indice,
+            patient_id=PATIENTS[primer_paciente + indice].patient_id,
             doctor_id=doctor.doctor_id,
             doctor_name=doctor.full_name,
             service_type=servicio,
@@ -40,7 +56,7 @@ def _appointments(doctor: Doctor, on_date: date) -> list[Appointment]:
             reason=motivo,
             status=estado,
         )
-        for indice, (inicio, fin, servicio, motivo, estado) in enumerate(SERVICES, start=1)
+        for indice, (inicio, fin, servicio, motivo, estado) in enumerate(SERVICES)
     ]
 
 
@@ -51,6 +67,10 @@ def run() -> None:
         doctores = DoctorRepository(db)
         for doctor in DOCTORS:
             doctores.save(doctor)
+
+        pacientes = PatientRepository(db)
+        for paciente in PATIENTS:
+            pacientes.save(paciente)
 
         configuracion = ConfigurationService(ConfigurationRepository(db))
         configuracion.update_appointment_window_weeks(4)
@@ -79,8 +99,8 @@ def run() -> None:
                     citas.save(cita)
 
         print(
-            f"Datos de ejemplo cargados: {len(DOCTORS)} profesionales "
-            f"con citas para {hoy} y {hoy + timedelta(days=1)}."
+            f"Datos de ejemplo cargados: {len(DOCTORS)} profesionales, {len(PATIENTS)} pacientes "
+            f"y citas para {hoy} y {hoy + timedelta(days=1)}."
         )
     finally:
         db.close()
