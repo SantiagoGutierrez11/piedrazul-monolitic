@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.exceptions import DomainError, ValidationError
+from app.core.security import Role, require_role
 from app.modules.appointment.api.schemas import AppointmentResponse
 from app.modules.appointment.application.list_appointments import ListAppointments
 from app.modules.appointment.application.scheduling.autonomous_scheduling import (
@@ -29,6 +30,8 @@ from app.modules.patient.infrastructure.repository import PatientRepository
 
 router = APIRouter()
 
+STAFF = (Role.AGENDADOR, Role.MEDICO, Role.ADMINISTRADOR)
+
 
 class ScheduleRequest(BaseModel):
     patient_id: int
@@ -47,7 +50,11 @@ def get_list_appointments(db: Session = Depends(get_db)) -> ListAppointments:
     )
 
 
-@router.get("/doctor/{doctor_id}/date/{date}", response_model=list[AppointmentResponse])
+@router.get(
+    "/doctor/{doctor_id}/date/{date}",
+    response_model=list[AppointmentResponse],
+    dependencies=[Depends(require_role(*STAFF))],
+)
 def list_by_doctor_and_date(
     doctor_id: int,
     date: date,
@@ -59,12 +66,20 @@ def list_by_doctor_and_date(
     return [AppointmentResponse.from_listing(item) for item in listing]
 
 
-@router.get("/patient/{patient_id}", response_model=list[AppointmentResponse])
+@router.get(
+    "/patient/{patient_id}",
+    response_model=list[AppointmentResponse],
+    dependencies=[Depends(require_role(*STAFF))],
+)
 def list_by_patient(patient_id: int, use_case: ListAppointments = Depends(get_list_appointments)):
     return [AppointmentResponse.from_listing(item) for item in use_case.by_patient(patient_id)]
 
 
-@router.post("/autonomous", status_code=201)
+@router.post(
+    "/autonomous",
+    status_code=201,
+    dependencies=[Depends(require_role(Role.PACIENTE, Role.AGENDADOR))],
+)
 def schedule_autonomous(dto: ScheduleRequest, db: Session = Depends(get_db)):
     appointment = Appointment(
         patient_id=dto.patient_id,

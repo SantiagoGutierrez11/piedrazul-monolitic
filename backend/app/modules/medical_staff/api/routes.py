@@ -4,12 +4,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.modules.appointment.infrastructure.repository import AppointmentRepository
 from app.modules.medical_staff.api.schemas import DoctorResponse
 from app.modules.medical_staff.domain.factory.availability_generator import get_availability_generator
 from app.modules.medical_staff.infrastructure.repository import DoctorRepository
 
-router = APIRouter()
+# Todos los roles necesitan consultar profesionales y franjas disponibles.
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def get_repository(db: Session = Depends(get_db)) -> DoctorRepository:
