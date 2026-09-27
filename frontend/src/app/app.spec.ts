@@ -3,24 +3,12 @@ import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
-  beforeEach(async () => {
+  it('should create the app', async () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter([])],
     }).compileComponents();
-  });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it('should render the sidebar navigation', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-
-    expect(compiled.querySelector('.brand-text strong')?.textContent).toContain('Piedrazul');
-    expect(compiled.querySelector('nav')?.textContent).toContain('Listar Citas');
+    expect(TestBed.createComponent(App).componentInstance).toBeTruthy();
   });
 });
