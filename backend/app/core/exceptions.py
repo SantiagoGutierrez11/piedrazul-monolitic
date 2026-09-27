@@ -50,6 +50,11 @@ def register_exception_handlers(app) -> None:
         message = errors[0]["message"] if errors else "Los datos enviados no son válidos"
         return JSONResponse(status_code=422, content={"message": message, "errors": errors})
 
+    @app.exception_handler(DomainError)
+    async def domain_error_handler(_: Request, exc: DomainError):
+        # Cualquier regla de negocio sin un tipo más específico se trata como petición inválida.
+        return JSONResponse(status_code=400, content={"message": exc.message})
+
     @app.exception_handler(NotFoundError)
     async def not_found_handler(_: Request, exc: NotFoundError):
         return JSONResponse(status_code=404, content={"message": exc.message})
