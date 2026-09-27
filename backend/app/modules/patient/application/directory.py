@@ -29,3 +29,11 @@ class PatientDirectory:
             )
             for patient in self._repository.find_by_ids(patient_ids)
         }
+
+    def exists(self, patient_id: int) -> bool:
+        return bool(self._repository.find_by_ids({patient_id}))
+
+    def find_id_by_user(self, user_id: str) -> int | None:
+        """Paciente asociado a una cuenta de acceso (identificador de Keycloak)."""
+        patient = self._repository.find_by_user_id(user_id)
+        return patient.patient_id if patient else None
