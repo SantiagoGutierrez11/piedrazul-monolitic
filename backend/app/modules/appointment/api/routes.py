@@ -24,6 +24,8 @@ from app.modules.appointment.domain.validators.data_appointment_validator import
     DataAppointmentValidator,
 )
 from app.modules.appointment.infrastructure.repository import AppointmentRepository
+from app.modules.patient.application.directory import PatientDirectory
+from app.modules.patient.infrastructure.repository import PatientRepository
 
 router = APIRouter()
 
@@ -40,7 +42,9 @@ class ScheduleRequest(BaseModel):
 
 
 def get_list_appointments(db: Session = Depends(get_db)) -> ListAppointments:
-    return ListAppointments(AppointmentRepository(db))
+    return ListAppointments(
+        AppointmentRepository(db), PatientDirectory(PatientRepository(db))
+    )
 
 
 @router.get("/doctor/{doctor_id}/date/{date}", response_model=list[AppointmentResponse])
@@ -51,16 +55,13 @@ def list_by_doctor_and_date(
     status: AppointmentStatus | None = None,
     use_case: ListAppointments = Depends(get_list_appointments),
 ):
-    appointments = use_case.by_doctor_and_date(doctor_id, date, service_type, status)
-    return [AppointmentResponse.model_validate(appointment) for appointment in appointments]
+    listing = use_case.by_doctor_and_date(doctor_id, date, service_type, status)
+    return [AppointmentResponse.from_listing(item) for item in listing]
 
 
 @router.get("/patient/{patient_id}", response_model=list[AppointmentResponse])
 def list_by_patient(patient_id: int, use_case: ListAppointments = Depends(get_list_appointments)):
-    return [
-        AppointmentResponse.model_validate(appointment)
-        for appointment in use_case.by_patient(patient_id)
-    ]
+    return [AppointmentResponse.from_listing(item) for item in use_case.by_patient(patient_id)]
 
 
 @router.post("/autonomous", status_code=201)

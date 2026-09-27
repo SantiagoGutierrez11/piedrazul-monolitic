@@ -5,6 +5,8 @@ import pytest
 
 from app.modules.appointment.domain.entities import Appointment, AppointmentStatus, ServiceType
 from app.modules.appointment.infrastructure.repository import AppointmentRepository
+from app.modules.patient.domain.entities import Patient
+from app.modules.patient.infrastructure.repository import PatientRepository
 
 ON_DATE = date(2026, 3, 10)
 
@@ -28,6 +30,11 @@ def _appointment(start: time, **overrides) -> Appointment:
 @pytest.fixture()
 def repository(db_session):
     return AppointmentRepository(db_session)
+
+
+@pytest.fixture()
+def patients(db_session):
+    return PatientRepository(db_session)
 
 
 def test_list_returns_empty_when_no_appointments(client):
@@ -77,3 +84,23 @@ def test_list_by_patient(client, repository):
 
     assert len(body) == 1
     assert body[0]["patientId"] == 101
+
+
+def test_list_includes_patient_name_and_phone(client, repository, patients):
+    patients.save(
+        Patient(patient_id=101, first_name="María", last_name="García", phone="+57 300 123 4567")
+    )
+    repository.save(_appointment(time(8, 0)))
+
+    body = client.get(f"/api/v1/appointments/doctor/1/date/{ON_DATE}").json()
+
+    assert body[0]["patientName"] == "María García"
+    assert body[0]["patientPhone"] == "+57 300 123 4567"
+
+
+def test_list_leaves_patient_name_empty_when_not_registered(client, repository):
+    repository.save(_appointment(time(8, 0)))
+
+    body = client.get(f"/api/v1/appointments/doctor/1/date/{ON_DATE}").json()
+
+    assert body[0]["patientName"] is None

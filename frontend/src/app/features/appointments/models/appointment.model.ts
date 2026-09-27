@@ -6,6 +6,8 @@ export type AppointmentStatus = 'AGENDADA' | 'REAGENDADA' | 'ATENDIDA' | 'CANCEL
 export interface Appointment {
   appointmentId: number;
   patientId: number;
+  patientName: string | null;
+  patientPhone: string | null;
   doctorId: number;
   doctorName: string;
   serviceType: ServiceType;
