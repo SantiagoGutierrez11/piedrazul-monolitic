@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { API_BASE_URL } from '../../../core/api-config';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Login } from './login';
@@ -35,7 +35,9 @@ describe('Login', () => {
     http.expectNone(`${API_BASE_URL}/auth/login`);
   });
 
-  it('rejects a staff account signing in from the patient tab', () => {
+  it('sends each user to the home screen of their role', () => {
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     const login = fixture.componentInstance;
     login.form.setValue({ email: 'admin@piedrazul.com', password: 'admin123', recordarme: false });
 
@@ -47,11 +49,9 @@ describe('Login', () => {
       refreshExpiresIn: 7200,
       user: { id: 'u1', email: 'admin@piedrazul.com', fullName: 'Admin Sistema', roles: ['administrador'] },
     });
-    http.expectOne(`${API_BASE_URL}/auth/logout`).flush(null);
-    fixture.detectChanges();
 
-    expect(text()).toContain('Esta cuenta es de un profesional');
-    expect(TestBed.inject(AuthService).isAuthenticated()).toBe(false);
+    expect(navegar).toHaveBeenCalledWith('/configuration');
+    expect(TestBed.inject(AuthService).isAuthenticated()).toBe(true);
   });
 
   it('shows the message returned by the server for wrong credentials', () => {

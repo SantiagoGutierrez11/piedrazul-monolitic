@@ -14,28 +14,7 @@
   </header>
 
   <section class="auth-card login-card">
-    <div class="tabs" role="tablist" aria-label="Tipo de usuario">
-      <button
-        type="button"
-        role="tab"
-        class="tab"
-        [class.active]="perfil() === 'paciente'"
-        [attr.aria-selected]="perfil() === 'paciente'"
-        (click)="seleccionarPerfil('paciente')"
-      >
-        Paciente
-      </button>
-      <button
-        type="button"
-        role="tab"
-        class="tab"
-        [class.active]="perfil() === 'profesional'"
-        [attr.aria-selected]="perfil() === 'profesional'"
-        (click)="seleccionarPerfil('profesional')"
-      >
-        Profesional
-      </button>
-    </div>
+    <h1 class="titulo">Iniciar sesión</h1>
 
     <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
       <div class="field">

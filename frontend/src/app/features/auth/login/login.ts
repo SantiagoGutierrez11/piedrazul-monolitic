@@ -2,11 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthUser } from '../../../core/auth/auth.models';
 import { AuthService } from '../../../core/auth/auth.service';
 import { mensajeDeError } from '../../../shared/error-messages';
-
-type Perfil = 'paciente' | 'profesional';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +15,6 @@ export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly perfil = signal<Perfil>('paciente');
   readonly verPassword = signal(false);
   readonly enviando = signal(false);
   readonly error = signal('');
@@ -42,11 +38,6 @@ export class Login {
     }
   }
 
-  seleccionarPerfil(perfil: Perfil): void {
-    this.perfil.set(perfil);
-    this.error.set('');
-  }
-
   mostrarError(campo: 'email' | 'password'): boolean {
     const control = this.form.controls[campo];
     return control.invalid && (control.touched || this.intentoEnviar());
@@ -64,17 +55,9 @@ export class Login {
     const { email, password, recordarme } = this.form.getRawValue();
     this.enviando.set(true);
     this.auth.login(email, password, recordarme).subscribe({
-      next: (usuario) => {
+      next: () => {
         this.enviando.set(false);
-        if (!this.correspondeAlPerfil(usuario)) {
-          this.auth.logout({ redirect: false });
-          this.error.set(
-            this.perfil() === 'paciente'
-              ? 'Esta cuenta es de un profesional. Ingresa desde la pestaña "Profesional".'
-              : 'Esta cuenta es de un paciente. Ingresa desde la pestaña "Paciente".',
-          );
-          return;
-        }
+        // El rol viene de la cuenta en Keycloak: cada usuario llega a su pantalla principal.
         this.router.navigateByUrl(this.auth.homeUrl());
       },
       error: (response: HttpErrorResponse) => {
@@ -84,8 +67,4 @@ export class Login {
     });
   }
 
-  private correspondeAlPerfil(usuario: AuthUser): boolean {
-    const esPaciente = usuario.roles.includes('paciente');
-    return this.perfil() === 'paciente' ? esPaciente : usuario.roles.some((r) => r !== 'paciente');
-  }
 }
