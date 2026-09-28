@@ -1,5 +1,5 @@
 .inicio {
-  max-width: 44rem;
+  max-width: 72rem;
 
   h1 {
     font-size: 2.1rem;
@@ -10,8 +10,14 @@
   }
 }
 
+.columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  gap: 0 1.5rem;
+  align-items: start;
+}
+
 .agendar {
-  margin-bottom: 1.75rem;
   padding: 0.95rem 1.6rem;
   font-size: 1.05rem;
 
