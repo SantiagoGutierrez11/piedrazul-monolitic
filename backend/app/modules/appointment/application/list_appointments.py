@@ -40,6 +40,14 @@ class ListAppointments:
         ]
         return self._with_patients(appointments)
 
+    def by_date(self, on_date: date, doctor_id: int | None = None) -> list[AppointmentWithPatient]:
+        appointments = [
+            appointment
+            for appointment in self._repository.find_between(on_date, on_date)
+            if doctor_id is None or appointment.doctor_id == doctor_id
+        ]
+        return self._with_patients(appointments)
+
     def by_patient(self, patient_id: int) -> list[AppointmentWithPatient]:
         return self._with_patients(self._repository.find_by_patient(patient_id))
 

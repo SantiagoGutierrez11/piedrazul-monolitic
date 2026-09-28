@@ -50,6 +50,17 @@ class AppointmentResponse(CamelModel):
         return response
 
 
+class DayCountResponse(CamelModel):
+    date: date
+    count: int
+
+
+class SummaryResponse(CamelModel):
+    today: int
+    pending: int
+    week: list[DayCountResponse]
+
+
 class PatientBookingRequest(CamelModel):
     doctor_id: int = Field(gt=0)
     service_type: ServiceType

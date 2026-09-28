@@ -13,11 +13,14 @@ from app.core.security import CurrentUser, Role, require_role
 from app.modules.appointment.api.schemas import (
     AppointmentResponse,
     AttendRequest,
+    DayCountResponse,
     PatientBookingRequest,
     SchedulingOptionsResponse,
+    SummaryResponse,
 )
 from app.modules.appointment.application.appointment_status import (
     AttendAppointment,
+    CancelAppointment,
     CancelPatientAppointment,
 )
 from app.modules.appointment.application.list_appointments import ListAppointments
@@ -25,6 +28,7 @@ from app.modules.appointment.application.scheduling.patient_scheduling import (
     SchedulePatientAppointment,
 )
 from app.modules.appointment.application.scheduling_options import SchedulingOptionsQuery
+from app.modules.appointment.application.summary import AppointmentSummaryQuery
 from app.modules.appointment.domain.entities import AppointmentStatus, ServiceType
 from app.modules.appointment.infrastructure.authorization_repository import AuthorizationRepository
 from app.modules.appointment.infrastructure.repository import AppointmentRepository
@@ -99,6 +103,44 @@ def list_by_doctor_and_date(
 )
 def list_by_patient(patient_id: int, use_case: ListAppointments = Depends(get_list_appointments)):
     return [AppointmentResponse.from_listing(item) for item in use_case.by_patient(patient_id)]
+
+
+@router.get(
+    "/date/{on_date}",
+    response_model=list[AppointmentResponse],
+    dependencies=[Depends(require_role(*STAFF))],
+)
+def list_by_date(
+    on_date: date,
+    doctor_id: int | None = None,
+    use_case: ListAppointments = Depends(get_list_appointments),
+):
+    """Citas de todos los profesionales (o de uno) en una fecha."""
+    return [AppointmentResponse.from_listing(item) for item in use_case.by_date(on_date, doctor_id)]
+
+
+@router.get(
+    "/summary",
+    response_model=SummaryResponse,
+    dependencies=[Depends(require_role(Role.AGENDADOR, Role.ADMINISTRADOR))],
+)
+def summary(db: Session = Depends(get_db), clock: Clock = Depends(get_clock)):
+    result = AppointmentSummaryQuery(AppointmentRepository(db), clock).execute()
+    return SummaryResponse(
+        today=result.today,
+        pending=result.pending,
+        week=[DayCountResponse(date=day.date, count=day.count) for day in result.week],
+    )
+
+
+@router.patch(
+    "/{appointment_id}/cancel",
+    response_model=AppointmentResponse,
+    dependencies=[Depends(require_role(Role.AGENDADOR, Role.ADMINISTRADOR))],
+)
+def cancel_appointment(appointment_id: int, db: Session = Depends(get_db)):
+    """Cancelación hecha por el personal del centro."""
+    return AppointmentResponse.from_appointment(CancelAppointment(AppointmentRepository(db)).execute(appointment_id))
 
 
 @router.patch(
