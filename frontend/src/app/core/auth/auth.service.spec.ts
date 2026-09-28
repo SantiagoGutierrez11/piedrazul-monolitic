@@ -57,7 +57,7 @@ describe('AuthService', () => {
       ['administrador', '/configuration'],
       ['agendador', '/appointments/listar'],
       ['medico', '/appointments/listar'],
-      ['paciente', '/appointments/agendar'],
+      ['paciente', '/paciente/inicio'],
     ];
     for (const [role, home] of homes) {
       login([role]);

@@ -22,6 +22,11 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: () => inject(AuthService).homeUrl() },
       {
+        path: 'paciente',
+        canActivate: [roleGuard(['paciente'])],
+        loadChildren: () => import('./features/patient/patient.routes').then((m) => m.patientRoutes),
+      },
+      {
         path: 'appointments',
         loadChildren: () =>
           import('./features/appointments/appointments.routes').then((m) => m.appointmentsRoutes),

@@ -7,9 +7,5 @@ import { AgendamientoAutonomo } from './agendamiento-autonomo/agendamiento-auton
 // Montado en app.routes.ts bajo /appointments (lazy-loaded).
 export const appointmentsRoutes: Routes = [
   { path: 'listar', component: ListarCitas, canActivate: [roleGuard(STAFF_ROLES)] },
-  {
-    path: 'agendar',
-    component: AgendamientoAutonomo,
-    canActivate: [roleGuard(['paciente', 'agendador'])],
-  },
+  { path: 'agendar', component: AgendamientoAutonomo, canActivate: [roleGuard(['paciente'])] },
 ];

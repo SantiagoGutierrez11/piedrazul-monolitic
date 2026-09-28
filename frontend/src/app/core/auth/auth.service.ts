@@ -88,7 +88,7 @@ export class AuthService {
       return '/appointments/listar';
     }
     if (this.hasRole('paciente')) {
-      return '/appointments/agendar';
+      return '/paciente/inicio';
     }
     return '/login';
   }

@@ -1,0 +1,83 @@
+:host {
+  display: block;
+}
+
+.cita {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+
+  &__icono {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  &__datos {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      font-size: 1rem;
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+    }
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  font-weight: 600;
+
+  svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+}
+
+.cancelar {
+  flex-shrink: 0;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--color-danger);
+  background: var(--color-surface);
+  border-color: #fecaca;
+
+  &:hover:not(:disabled) {
+    background: var(--color-danger-soft);
+  }
+}
+
+@media (max-width: 640px) {
+  .cita {
+    flex-wrap: wrap;
+    padding: 1rem;
+
+    &__datos {
+      flex-basis: calc(100% - 4rem);
+    }
+  }
+
+  .badge {
+    margin-left: 3.75rem;
+  }
+}
