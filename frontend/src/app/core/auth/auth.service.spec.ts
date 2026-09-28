@@ -54,9 +54,9 @@ describe('AuthService', () => {
 
   it('sends each role to its home screen', () => {
     const homes: [Role, string][] = [
-      ['administrador', '/configuration'],
-      ['agendador', '/appointments/listar'],
-      ['medico', '/appointments/listar'],
+      ['administrador', '/panel/admin'],
+      ['agendador', '/panel/agenda'],
+      ['medico', '/panel/medico'],
       ['paciente', '/paciente/inicio'],
     ];
     for (const [role, home] of homes) {

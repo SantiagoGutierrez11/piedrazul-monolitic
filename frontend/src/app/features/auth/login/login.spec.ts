@@ -50,7 +50,7 @@ describe('Login', () => {
       user: { id: 'u1', email: 'admin@piedrazul.com', fullName: 'Admin Sistema', roles: ['administrador'] },
     });
 
-    expect(navegar).toHaveBeenCalledWith('/configuration');
+    expect(navegar).toHaveBeenCalledWith('/panel/admin');
     expect(TestBed.inject(AuthService).isAuthenticated()).toBe(true);
   });
 

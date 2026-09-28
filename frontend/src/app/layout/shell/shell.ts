@@ -21,6 +21,18 @@ export class Shell {
     return roles.map((role) => ROLE_LABELS[role]).join(' · ');
   });
 
+  // Panel inicial del personal; el paciente tiene su propia pantalla de inicio.
+  readonly panelUrl = computed(() => {
+    const url = this.auth.homeUrl();
+    return url.startsWith('/panel/') ? url : null;
+  });
+  readonly seccion = computed(() => {
+    if (this.isPatient()) {
+      return 'Paciente';
+    }
+    return this.auth.hasRole('agendador', 'administrador') ? 'Administración' : 'Mi consulta';
+  });
+
   can(...roles: Role[]): boolean {
     return this.auth.hasRole(...roles);
   }

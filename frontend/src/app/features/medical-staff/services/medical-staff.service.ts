@@ -18,6 +18,11 @@ export class MedicalStaffService {
     return this.http.get<Doctor[]>(`${this.baseUrl}/doctors`);
   }
 
+  // Profesional vinculado a la cuenta del médico autenticado.
+  myProfile() {
+    return this.http.get<Doctor>(`${this.baseUrl}/doctors/me`);
+  }
+
   listAvailableDoctors(specialty: string) {
     return this.http.get<AvailableDoctor[]>(`${this.baseUrl}/doctors/available`, {
       params: { specialty },

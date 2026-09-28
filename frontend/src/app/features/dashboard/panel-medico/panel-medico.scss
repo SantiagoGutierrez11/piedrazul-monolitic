@@ -1,0 +1,83 @@
+.proxima {
+  padding: 1.5rem;
+
+  p {
+    margin: 0 0 0.35rem;
+  }
+
+  &__hora {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  &__paciente {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  &__servicio {
+    color: var(--color-text-muted);
+  }
+
+  &__motivo {
+    margin: 1rem 0 1.25rem !important;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+
+    small {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+  }
+
+  button {
+    margin-top: 0.75rem;
+  }
+}
+
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.libre {
+      color: var(--color-text-muted);
+    }
+
+    &.hecha strong {
+      text-decoration: line-through;
+      color: var(--color-text-muted);
+    }
+  }
+
+  &__hora {
+    width: 5.5rem;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  &__detalle {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    small {
+      color: var(--color-text-muted);
+    }
+  }
+}

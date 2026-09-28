@@ -324,3 +324,91 @@ table {
     text-decoration: underline;
   }
 }
+
+/* ---------- Paneles del personal (médico, agendador, administrador) ---------- */
+
+.panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitle {
+    margin: 0;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.1rem 1.25rem;
+
+  small {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  strong {
+    font-size: 1.75rem;
+    letter-spacing: -0.02em;
+
+    &.ok {
+      color: var(--color-success);
+    }
+
+    &.warn {
+      color: var(--color-warning);
+    }
+
+    &.danger {
+      color: var(--color-danger);
+    }
+  }
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.bloque {
+  padding: 0;
+  overflow: hidden;
+
+  &__titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    padding: 1.1rem 1.5rem;
+    font-size: 1.05rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+}
+
+.vacio {
+  margin: 0;
+  padding: 1.5rem;
+  color: var(--color-text-muted);
+}
