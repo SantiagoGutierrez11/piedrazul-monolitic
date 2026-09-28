@@ -1,251 +1,157 @@
-# Piedrazul: Monolito Modular
+# Piedrazul
 
-> Sistema de agendamiento de citas médicas · 2026.2, Corte 1
+Sistema de agendamiento de citas médicas. Proyecto de Ingeniería de Software 3,
+Universidad del Cauca, 2026.2.
 
-**Piedrazul** es un sistema de agendamiento de citas médicas desarrollado como proyecto
-académico para Ingeniería de Software 3. Este repositorio contiene la versión
-**monolito modular**: un refactor de `../Mircoservicios/piedrazul` (arquitectura de
-microservicios con Spring Boot + React) hacia un único desplegable con backend en
-**FastAPI** (Python) y frontend en **Angular**, donde cada módulo de negocio conserva
-la misma separación en capas (dominio, aplicación e infraestructura) que tenía como
-microservicio independiente.
+Es un monolito modular: un solo backend en FastAPI (Python) dividido en módulos
+independientes, un frontend en Angular, PostgreSQL como base de datos y Keycloak para el
+inicio de sesión.
 
----
+## Integrantes
 
-## Tabla de contenidos
+| Integrante | Historia de usuario principal |
+|---|---|
+| Leyder Cerón | Agendamiento autónomo de citas |
+| Andrea Gómez | Listar citas |
+| Santiago Gutiérrez | Configuración del sistema |
 
-- [Ejecutar con Docker](#ejecutar-con-docker)
-- [Responsables del Corte 1](#responsables-del-corte-1)
-- [Backend (FastAPI)](#backend-fastapi)
-- [Frontend (Angular 22)](#frontend-angular-22-standalone-components)
-- [Decisión de base de datos](#decisión-de-base-de-datos)
+## Cómo ejecutarlo
 
----
-
-## Ejecutar con Docker
-
-La forma más rápida de levantar todo (PostgreSQL + Keycloak + backend + frontend) sin
-instalar Python ni Node:
+Solo se necesita Docker. Desde la carpeta del proyecto:
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
-| Servicio | URL |
-|---|---|
-| Frontend (Angular + nginx) | http://localhost:4200 |
-| Backend (FastAPI) | http://localhost:8000 · docs en `/docs` |
-| Keycloak | http://localhost:8080 · consola de administración con `admin` / `admin` |
-| PostgreSQL | localhost:5432 (usuario/clave `postgres`) |
-
-Keycloak tarda unos 30 segundos en quedar listo la primera vez: importa el realm
-`piedrazul` desde `keycloak/realm-piedrazul.json`, con los cuatro roles (`paciente`,
-`agendador`, `medico`, `administrador`), el cliente del backend y los usuarios de prueba.
-
-Los schemas y tablas de cada módulo se crean solos al arrancar el backend. Para cargar
-datos de ejemplo y poder ver el listado de citas:
+Espera unos 30 segundos a que Keycloak arranque y carga los datos de ejemplo:
 
 ```bash
 docker compose exec backend python -m app.seed
 ```
 
-Para bajar todo (agrega `-v` si además quieres borrar la base de datos):
+Luego abre http://localhost:4200
 
-```bash
-docker compose down
-```
+| Servicio | Dirección |
+|---|---|
+| Aplicación | http://localhost:4200 |
+| API y su documentación | http://localhost:8000/docs |
+| Keycloak (consola, `admin` / `admin`) | http://localhost:8080 |
 
-> **Si ya tenías la base creada antes de la integración con Keycloak**, bórrala con
-> `docker compose down -v` y vuelve a cargar los datos de ejemplo: la tabla de pacientes
-> tiene columnas nuevas y el proyecto no usa migraciones.
+Para apagar todo usa `docker compose down`. Si cambió la estructura de la base de datos,
+usa `docker compose down -v` (borra los datos) y vuelve a cargar el seed.
 
 ### Usuarios de prueba
 
-Solo para desarrollo. Todos inician sesión con su correo:
+El rol se detecta solo al iniciar sesión.
 
-| Rol | Correo | Contraseña | Pestaña del login |
-|---|---|---|---|
-| Administrador | `admin@piedrazul.com` | `admin123` | Profesional |
-| Agendador | `agendador@piedrazul.com` | `agendador123` | Profesional |
-| Médico | `medico@piedrazul.com` | `medico123` | Profesional |
-| Paciente | `paciente@piedrazul.com` | `paciente123` | Paciente |
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | `admin@piedrazul.com` | `admin123` |
+| Agendador | `agendador@piedrazul.com` | `agendador123` |
+| Médico | `medico@piedrazul.com` | `medico123` |
+| Paciente | `paciente@piedrazul.com` | `paciente123` |
 
-El paciente de prueba corresponde a María García López de los datos de ejemplo. Cualquier
-persona puede crear su propia cuenta de paciente desde **Regístrate** en la pantalla de
-inicio de sesión; queda con el rol `paciente` en Keycloak.
+También se puede crear una cuenta de paciente nueva desde **Regístrate**.
 
----
+## Qué puede hacer cada rol
 
-## Responsables del Corte 1
+- **Paciente:** registrarse, agendar su propia cita en cuatro pasos (servicio,
+  profesional, día y hora), ver su próxima cita y su historial, y cancelar.
+- **Médico:** ver su día (pacientes, atendidos y pendientes) y marcar citas como
+  atendidas. Al atender puede autorizar un servicio especializado al paciente.
+- **Agendador:** ver la agenda del día de todos los profesionales, filtrar por
+  profesional y fecha, y cancelar citas.
+- **Administrador:** ver el resumen general y configurar la ventana de agendamiento y el
+  horario de cada profesional.
 
-| Integrante | Historia de usuario | Backend | Frontend |
-|---|---|---|---|
-| Leyder Cerón | Agendamiento autónomo | `appointment/application/scheduling/`, `appointment/domain/validators/`, `appointment/domain/builder/` y `medical_staff/domain/factory/` | `features/appointments/agendamiento-autonomo/` |
-| Andrea Gómez | Listar citas | `appointment/api/routes.py` y `appointment/application/list_appointments.py` | `features/appointments/listar-citas/` |
-| Santiago Gutiérrez | Configuración del sistema | `configuration/` (con apoyo en `medical_staff/`) | `features/configuration/` |
+## Reglas al agendar una cita
 
-Las carpetas `backend/app/core/` (configuración, base de datos, seguridad y eventos) y
-`frontend/src/app/core/` (interceptor del token y guards) las hicimos entre los tres,
-porque las tres historias las necesitaban para conectarse con el backend.
+Antes de guardar una cita, el backend revisa en este orden:
 
----
+1. Los datos están completos, la fecha no es pasada y el motivo tiene al menos 5 caracteres.
+2. No es un festivo en Colombia.
+3. El paciente y el profesional existen, y el profesional está activo.
+4. El profesional atiende el servicio pedido.
+5. El paciente no tiene otra cita activa.
+6. La fecha está dentro de la ventana de agendamiento (4 semanas por defecto).
+7. La hora está dentro del horario del profesional.
+8. Fisioterapia, Quiropraxia y Terapia Neural necesitan una autorización de Medicina General.
+9. La franja no está ocupada por otra cita.
 
-## Backend (FastAPI)
+Si alguna falla, la cita no se guarda y el usuario ve el motivo.
+
+## Estructura
 
 ```
 backend/app/
-├── main.py                 # crea la app y monta el router de cada módulo
-├── core/                   # transversal: config, database (1 BD, schema por módulo),
-│                           # security (valida los tokens de Keycloak y exige roles),
-│                           # event_bus (in-process, reemplaza RabbitMQ), exceptions
-├── modules/
-│   ├── appointment/        # dominio ya migrado como referencia: entities, validators/
-│   │                       # (Strategy/Chain), application/scheduling/ (Template Method:
-│   │                       # base + manual + autonomous), infrastructure/repository.py
-│   ├── configuration/      # esqueleto: entities, application/service.py, api/routes.py
-│   ├── medical_staff/      # domain/factory/ (Factory Method: AvailabilityGenerator)
-│   ├── patient/            # registro de pacientes (crea su cuenta a través de identity)
-│   └── identity/           # inicio de sesión y cuentas de usuario sobre Keycloak
+├── core/          configuración, base de datos, seguridad y eventos
+├── shared/        reloj y festivos de Colombia
+└── modules/
+    ├── appointment/     citas: agendar, listar, cancelar y atender
+    ├── medical_staff/   profesionales y disponibilidad
+    ├── configuration/   ventana de agendamiento y horarios
+    ├── patient/         registro y perfil del paciente
+    └── identity/        inicio de sesión con Keycloak
+
+frontend/src/app/
+├── core/          sesión, roles, guards e interceptor del token
+├── layout/        barra lateral según el rol
+└── features/      pantallas de cada módulo
 ```
 
-### Cómo correrlo
+Cada módulo del backend tiene cuatro capas: `api`, `application`, `domain` e
+`infrastructure`. Cada módulo usa su propio schema en PostgreSQL y se comunica con
+los demás a través de fachadas (`Directory`), sin leer tablas ajenas.
+
+### Patrones de diseño usados
+
+| Patrón | Dónde |
+|---|---|
+| Strategy y Chain of Responsibility | `appointment/domain/validators/` y `application/scheduling/validation_chain.py` |
+| Template Method | `appointment/application/scheduling/base.py` |
+| Builder y Director | `appointment/domain/builder/` |
+| Factory Method | `medical_staff/domain/factory/availability_generator.py` |
+| Fachada entre módulos | `application/directory.py` de appointment, medical_staff, patient y configuration |
+| Puertos (interfaces) | `appointment/domain/ports.py` e `identity/domain/ports.py` |
+
+## Pruebas
+
+Backend:
 
 ```bash
 cd backend
-python -m venv .venv && .venv/Scripts/activate   # Windows
 pip install -r requirements.txt
-python -m app.seed        # crea las tablas y carga datos de ejemplo (opcional)
-uvicorn app.main:app --reload
-```
-
-`GET http://localhost:8000/health` debe responder `{"status": "ok"}`.
-La documentación interactiva de la API queda en `http://localhost:8000/docs`.
-
-Por defecto usa **SQLite** (`piedrazul.db`) para poder levantarlo sin instalar nada más.
-Para usar PostgreSQL con un schema por módulo, crea un `.env` en `backend/`:
-
-```
-DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/piedrazul
-```
-
-Las tablas y los schemas se crean solos al arrancar la aplicación.
-
-Todas las rutas, salvo el inicio de sesión y el registro de pacientes, exigen un token de
-Keycloak. Para correr el backend fuera de Docker, levanta solo Keycloak con
-`docker compose up -d keycloak`; el backend lo busca por defecto en `http://localhost:8080`
-(se cambia con la variable `KEYCLOAK_URL`).
-
-### Tests
-
-```bash
-cd backend
 pytest
 ```
 
-Cubren las reglas del validador de conflictos, la configuración del sistema
-(`tests/modules/configuration/`), el listado de citas (`tests/modules/appointment/`), la
-validación de tokens y los permisos por rol (`tests/core/`), el adaptador de Keycloak y el
-inicio de sesión (`tests/modules/identity/`), el registro de pacientes
-(`tests/modules/patient/`), la cadena de validación y el agendamiento autónomo
-(`tests/modules/appointment/`), la disponibilidad (`tests/modules/medical_staff/`) y los
-festivos (`tests/shared/`). No necesitan Keycloak: usan tokens firmados con una llave de
-prueba y un proveedor de identidad en memoria. Las del agendamiento fijan la fecha en el
-lunes 9 de marzo de 2026 para que festivos y fines de semana sean predecibles.
-
-### Agendamiento autónomo
-
-El paciente agenda su propia cita en cuatro pasos: servicio, profesional, fecha y hora, y
-confirmación. Antes de guardarla, el backend aplica en orden la cadena de validadores de
-`appointment/domain/validators/`:
-
-1. Datos coherentes, cita en el futuro y motivo de al menos 5 caracteres.
-2. No es festivo en Colombia.
-3. El paciente existe y el profesional existe y está activo.
-4. El profesional pertenece a la especialidad del servicio.
-5. El paciente no tiene otra cita activa (agendada o reagendada).
-6. La fecha está dentro de la ventana de agendamiento configurada.
-7. La hora coincide con una franja del horario configurado del profesional.
-8. Los servicios especializados exigen una autorización médica vigente: el médico la
-   otorga al atender una Consulta General, se usa una sola vez y caduca al mes.
-9. Nadie más tiene esa franja (la restricción única de la base cubre las reservas simultáneas).
-
-| Endpoint | Rol | Uso |
-|---|---|---|
-| `GET /api/v1/appointments/me/options` | Paciente | Servicios habilitados, autorización vigente y cita activa |
-| `GET /api/v1/medical/doctors/available?specialty=` | Cualquiera | Profesionales de la especialidad con su próxima fecha libre |
-| `GET /api/v1/medical/availability/calendar?doctor_id=` | Cualquiera | Días de la ventana con cupos libres |
-| `GET /api/v1/medical/availability?doctor_id=&date=` | Cualquiera | Franjas del día, marcando las ocupadas |
-| `POST /api/v1/appointments/autonomous` | Paciente | Agenda la cita; el paciente se toma del token |
-| `GET /api/v1/appointments/me` | Paciente | Citas del paciente |
-| `PATCH /api/v1/appointments/me/{id}/cancel` | Paciente | Cancela una cita propia |
-| `PATCH /api/v1/appointments/{id}/attend` | Médico | Marca la cita como atendida y opcionalmente autoriza un servicio |
-
-La fecha y la hora "actuales" se calculan en la zona horaria de Colombia (`TIMEZONE`, por
-defecto `America/Bogota`), aunque el contenedor corra en UTC.
-
-### Estado de los módulos
-
-| Módulo | Estado |
-|---|---|
-| `appointment` | Listado por médico/fecha y por paciente, con filtros de servicio y estado. Agendamiento autónomo con cadena de validadores, Builder, autorización médica y cancelación por el paciente |
-| `configuration` | Ventana de agendamiento y horario semanal por profesional |
-| `medical_staff` | Registro de profesionales y cálculo de franjas, días disponibles y próxima fecha libre a partir del horario configurado |
-| `patient` | Registro de pacientes con su cuenta de acceso (`POST /register`) y perfil propio (`GET /me`); expone un directorio consultado por el módulo de citas |
-| `identity` | Inicio, renovación y cierre de sesión contra Keycloak (`/api/v1/auth`); crea las cuentas de los pacientes |
-
----
-
-## Frontend (Angular 22, standalone components)
-
-```
-frontend/src/app/
-├── core/                    # api-config.ts, auth/ (sesión y roles), interceptors/auth-interceptor.ts,
-│                            # guards/auth-guards.ts
-├── layout/shell/            # barra lateral según el rol del usuario
-├── shared/                  # fechas en español, mensajes de error y diálogo de confirmación
-└── features/
-    ├── appointments/
-    │   ├── listar-citas/            <- Andrea
-    │   ├── agendamiento-autonomo/   <- Leyder
-    │   ├── services/appointment.service.ts
-    │   └── models/appointment.model.ts
-    ├── configuration/
-    │   ├── configuracion-global/       <- Santiago
-    │   ├── configuracion-profesional/  <- Santiago
-    │   └── services/configuration.service.ts
-    ├── medical-staff/           # servicio de apoyo (médicos, disponibilidad)
-    ├── patient/                 # inicio/ y mis-citas/ del paciente
-    └── auth/                    # login/ (pestañas Paciente y Profesional) y registro/
-```
-
-### Cómo correrlo
-
-> El workspace se generó con `--skip-install`, falta instalar dependencias.
+Frontend:
 
 ```bash
 cd frontend
 npm install
-npm start   # ng serve, http://localhost:4200
+npm test
 ```
 
-Las rutas están conectadas con lazy loading en `app.routes.ts`:
+Las pruebas del backend no necesitan Keycloak ni PostgreSQL: usan tokens de prueba, una
+base en memoria y una fecha fija.
 
-| Ruta | Acceso |
-|---|---|
-| `/login`, `/registro` | Sin sesión |
-| `/appointments/listar` | Agendador, médico y administrador |
-| `/paciente/inicio`, `/paciente/citas`, `/appointments/agendar` | Paciente |
-| `/configuration`, `/configuration/global`, `/configuration/profesional` | Administrador |
+## Desarrollo sin Docker
 
-Al iniciar sesión cada usuario llega a su pantalla principal según su rol.
+Backend (usa SQLite si no hay `DATABASE_URL`; Keycloak sí debe estar corriendo con
+`docker compose up -d keycloak`):
 
----
+```bash
+cd backend
+python -m venv .venv
+.venv/Scripts/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-## Decisión de base de datos
+Frontend:
 
-Una sola instancia **PostgreSQL**, con un schema por módulo (`appointment`,
-`configuration`, `medical_staff`, ...) en vez de una BD física por módulo. Cada módulo
-solo debe tocar su propio schema desde `infrastructure/`.
-
-Los scripts `init-*.sql` en `../Mircoservicios/piedrazul/docker/postgres/` sirven de
-base para los `CREATE TABLE` de cada schema; solo hay que adaptarlos.
+```bash
+cd frontend
+npm install
+npm start
+```
