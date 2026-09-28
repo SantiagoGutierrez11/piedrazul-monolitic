@@ -38,6 +38,7 @@ describe('Shell', () => {
   it('shows only the patient options to a patient', () => {
     const nav = renderFor(['paciente'], 'María García').querySelector('nav')!.textContent!;
 
+    expect(nav).toContain('Inicio');
     expect(nav).toContain('Agendar Cita');
     expect(nav).toContain('Mis Citas');
     expect(nav).not.toContain('Listar Citas');

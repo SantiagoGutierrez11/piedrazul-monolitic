@@ -20,6 +20,10 @@ cloud "Proveedor Cloud (ej. AWS / Azure / GCP)" {
         artifact "Backend FastAPI\n(monolito modular, Uvicorn/Gunicorn)" as backend_artifact
     }
 
+    node "Servidor de Identidad\n(contenedor)" as idp_server {
+        artifact "Keycloak 26\n(realm piedrazul: usuarios, roles, tokens)" as keycloak_artifact
+    }
+
     node "Servicio de Base de Datos Administrado" as db_server {
         database "PostgreSQL" as postgres {
             folder "schema: appointment"
@@ -40,6 +44,7 @@ cloud "Proveedor de Correo Externo" {
 browser --> cdn : HTTPS\n(descarga SPA)
 browser --> app_server : HTTPS/REST/JSON\n(/api/v1/*)
 app_server --> db_server : SQL\n(SQLAlchemy, TCP 5432, un schema por módulo)
+app_server --> idp_server : HTTP / OpenID Connect\n(login, cuentas de pacientes, llaves JWKS)
 app_server --> mail_server : SMTP / HTTPS API\n(recordatorios de citas - pendiente)
 
 note right of app_server

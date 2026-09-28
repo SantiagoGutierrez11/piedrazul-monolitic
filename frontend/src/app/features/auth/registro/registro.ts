@@ -10,7 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { mensajeDeError } from '../error-messages';
+import { mensajeDeError } from '../../../shared/error-messages';
 import { GENEROS, Genero, TIPOS_DOCUMENTO, TipoDocumento } from '../models/registro.model';
 import { RegistroService } from '../services/registro.service';
 
