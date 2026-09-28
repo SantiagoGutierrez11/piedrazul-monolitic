@@ -18,73 +18,93 @@ title Diagrama de Clases - Nivel 4 (Código) - Módulo Medical Staff\nPatrón: F
 package "Backend API - FastAPI (monolito)" <<Container>> {
 
   package "Módulo Medical Staff" <<Módulo>> {
-    class MedicalStaffRouter {
-        + list_doctors() : list
-        + get_doctor_schedule(doctor_id : int) : list
-        + get_availability(doctor_id : int, on_date : date) : list<time>
+
+    abstract class AvailabilityGeneratorFactory <<Factory Method - Creator>> {
+        + {abstract} create_generator() : AvailabilityGenerator
+        + get_generator() : AvailabilityGenerator
     }
 
-    abstract class AvailabilityGenerator <<Factory Method - Product>> {
-        + {abstract} generate(doctor_id : int, on_date : date) : list<time>
+    class StandardGeneratorFactory <<Concrete Creator>> {
+        + create_generator() : AvailabilityGenerator
+    }
+
+    abstract class AvailabilityGenerator <<Product>> {
+        + {abstract} generate(hours, occupied : set<time>, not_before : time) : list<AvailabilitySlot>
     }
 
     class StandardAvailabilityGenerator <<Concrete Product>> {
-        + generate(doctor_id : int, on_date : date) : list<time>
+        + generate(hours, occupied : set<time>, not_before : time) : list<AvailabilitySlot>
     }
 
-    class AvailabilityGeneratorFactory <<Factory Method - Creator>> {
-        + get_availability_generator() : AvailabilityGenerator
+    class AvailabilitySlot {
+        - time : time
+        - available : bool
     }
 
-    MedicalStaffRouter ..> AvailabilityGeneratorFactory : pide un generador
+    class AvailabilityService {
+        + for_date(doctor_id, date) : DayAvailability
+        + calendar(doctor_id) : list<CalendarDay>
+        + next_available_date(doctor_id) : date | None
+        + last_bookable_date() : date
+    }
+
+    interface ScheduleLookup <<Protocol>> {
+        + appointment_window_weeks() : int
+        + working_hours(doctor_id) : list<WorkingDay>
+    }
+
+    interface OccupancyLookup <<Protocol>> {
+        + occupied_times(doctor_id, date_from, date_to) : dict<date, set<time>>
+    }
+
+    AvailabilityGeneratorFactory <|-- StandardGeneratorFactory
     AvailabilityGenerator <|.. StandardAvailabilityGenerator
-    AvailabilityGeneratorFactory ..> AvailabilityGenerator : crea >
+    StandardGeneratorFactory ..> StandardAvailabilityGenerator : crea >
+    StandardAvailabilityGenerator ..> AvailabilitySlot : genera
+    AvailabilityService --> AvailabilityGeneratorFactory : pide un generador
+    AvailabilityService --> ScheduleLookup
+    AvailabilityService --> OccupancyLookup
   }
 
   package "Módulo Configuration" <<Módulo>> {
-    class DoctorScheduleConfiguration {
-        - doctor_id : int
-        - day_of_week : int
-        - start_time : time
-        - end_time : time
-        - interval_minutes : int
+    class ConfigurationDirectory {
+        + appointment_window_weeks() : int
+        + working_hours(doctor_id) : list<WorkingHours>
     }
   }
 
   package "Módulo Appointment" <<Módulo>> {
-    class Appointment {
-        - doctor_id : int
-        - date : date
-        - start_time : time
-        - end_time : time
-        - status : AppointmentStatus
+    class AppointmentDirectory {
+        + occupied_times(doctor_id, date_from, date_to) : dict<date, set<time>>
     }
   }
 
-  package "core (transversal)" <<Módulo>> {
-    class EventBus {
-        + subscribe(event_name : str, handler : Callable) : None
+  package "shared (transversal)" <<Módulo>> {
+    class ColombianHolidays {
+        + is_holiday(date) : bool
+    }
+    interface Clock {
+        + now() : datetime
     }
   }
 }
 
-StandardAvailabilityGenerator ..> DoctorScheduleConfiguration : lee horario configurado
-StandardAvailabilityGenerator ..> Appointment : descuenta citas ya ocupadas
-MedicalStaffRouter ..> EventBus : se suscribe a\nappointment.scheduled / configuration.updated
+ConfigurationDirectory ..|> ScheduleLookup
+AppointmentDirectory ..|> OccupancyLookup
+AvailabilityService --> ColombianHolidays : excluye festivos
+AvailabilityService --> Clock : hoy y hora actual
 
-note right of AvailabilityGeneratorFactory
-  Hoy siempre devuelve
-  StandardAvailabilityGenerator.
-  Punto de extensión para otra
-  estrategia de generación sin
-  tocar a quien la consume.
+note right of StandardGeneratorFactory
+  Hoy es la única fábrica concreta.
+  Otro tipo de horario solo requiere un nuevo
+  par generador/fábrica, sin tocar a
+  AvailabilityService ni a quien lo consume.
 end note
 
-note bottom of StandardAvailabilityGenerator
-  generate() descuenta de la jornada las citas
-  activas del profesional en esa fecha. La jornada
-  todavía está fijada en el código: debe leerse
-  del módulo Configuration.
+note bottom of AvailabilityService
+  Franjas del horario configurado del profesional,
+  dentro de la ventana de agendamiento, sin festivos,
+  sin horas ya pasadas y marcando las ocupadas.
 end note
 
 @enduml

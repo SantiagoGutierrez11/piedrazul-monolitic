@@ -35,7 +35,7 @@ app.include_router(appointment_router, prefix="/api/v1/appointments", tags=["App
 app.include_router(configuration_router, prefix="/api/v1/configuration", tags=["Configuration"])
 app.include_router(medical_staff_router, prefix="/api/v1/medical", tags=["Medical Staff"])
 app.include_router(patient_router, prefix="/api/v1/patients", tags=["Patients"])
-app.include_router(identity_router, prefix="/api/v1/identity", tags=["Identity"])
+app.include_router(identity_router, prefix="/api/v1/auth", tags=["Auth"])
 
 
 @app.get("/health")

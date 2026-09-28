@@ -1,0 +1,95 @@
+<header class="panel-header">
+  <div>
+    <h1>Resumen General</h1>
+    <p class="subtitle">{{ hoy }}</p>
+  </div>
+  <a class="boton" routerLink="/configuration">Configuración del sistema</a>
+</header>
+
+@if (error()) {
+  <p class="alert error" role="alert">{{ error() }}</p>
+}
+
+<section class="stats">
+  <div class="card stat">
+    <small>Total pacientes</small>
+    <strong>{{ pacientes() ?? '—' }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Citas hoy</small>
+    <strong>{{ resumen()?.today ?? '—' }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Profesionales activos</small>
+    <strong class="ok">{{ profesionales()?.length ?? '—' }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Citas pendientes</small>
+    <strong class="warn">{{ resumen()?.pending ?? '—' }}</strong>
+  </div>
+</section>
+
+<section class="card bloque profesionales">
+  <h2 class="bloque__titulo">
+    Profesionales y disponibilidad
+    <a class="link" routerLink="/configuration/profesional">Editar horarios</a>
+  </h2>
+  @if (profesionales() === null) {
+    <p class="vacio">Cargando profesionales...</p>
+  } @else {
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Profesional</th>
+            <th>Especialidad</th>
+            <th>Días</th>
+            <th>Franja</th>
+            <th>Intervalo</th>
+            <th>Citas hoy</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of profesionales(); track fila.medico.doctorId) {
+            <tr>
+              <td>
+                <strong>{{ fila.medico.fullName }}</strong>
+              </td>
+              <td>{{ fila.medico.specialty }}</td>
+              <td>{{ fila.dias }}</td>
+              <td>{{ fila.franja }}</td>
+              <td>{{ fila.intervalo }}</td>
+              <td>{{ fila.citasHoy }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<div class="panel-grid">
+  <section class="card bloque">
+    <h2 class="bloque__titulo">Citas de la semana</h2>
+    <div class="grafica" role="img" aria-label="Número de citas por día de la semana">
+      @for (dia of semana(); track dia.etiqueta) {
+        <div class="grafica__columna" [class.hoy]="dia.esHoy">
+          <span class="grafica__valor">{{ dia.total }}</span>
+          <span class="grafica__barra" [style.height.%]="dia.alto"></span>
+          <span class="grafica__dia">{{ dia.etiqueta }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="card bloque">
+    <h2 class="bloque__titulo">Parámetros del sistema</h2>
+    <div class="parametro">
+      <span>
+        <small>Ventana de agendamiento</small>
+        <strong>{{ semanas() !== null ? semanas() + ' semanas' : '—' }}</strong>
+      </span>
+      <a class="boton secondary" routerLink="/configuration/global">Editar parámetro</a>
+    </div>
+  </section>
+</div>
