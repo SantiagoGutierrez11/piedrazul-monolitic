@@ -1,0 +1,59 @@
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+  border-color: #bfdbfe;
+  background: var(--color-primary-soft);
+
+  &__etiqueta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-primary);
+  }
+
+  strong {
+    font-size: 1.3rem;
+  }
+
+  &__detalle {
+    color: var(--color-text-muted);
+  }
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 14rem;
+  }
+}
+
+.hora {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+
+  button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .cancelar:not(:disabled) {
+    color: var(--color-danger);
+    border-color: #fecaca;
+  }
+}

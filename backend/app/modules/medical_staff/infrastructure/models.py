@@ -13,3 +13,4 @@ class DoctorModel(Base):
     full_name: Mapped[str] = mapped_column(String(120), nullable=False)
     specialty: Mapped[str] = mapped_column(String(80), nullable=False, default="")
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    user_id: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)

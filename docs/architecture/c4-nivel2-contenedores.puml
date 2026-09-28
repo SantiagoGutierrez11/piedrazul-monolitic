@@ -3,18 +3,20 @@
 LAYOUT_WITH_LEGEND()
 title Diagrama de Contenedores - Sistema Piedrazul (Monolito Modular)
 
-Person(paciente, "Paciente", "Agenda citas desde el portal")
-Person(agendador, "Agendador", "Registra citas manualmente")
-Person(medico, "Médico", "Consulta su agenda de citas")
-Person(admin, "Administrador", "Gestiona configuración del sistema")
+Person(paciente, "Paciente", "Agenda, consulta y cancela sus citas")
+Person(agendador, "Agendador", "Consulta la agenda de los profesionales")
+Person(medico, "Médico", "Consulta su agenda y registra la atención")
+Person(admin, "Administrador", "Gestiona la configuración del sistema")
 
 System_Boundary(piedrazul, "Sistema de Agendamiento Piedrazul") {
 
-  Container(frontend, "Frontend Web", "Angular 22 (standalone components)", "SPA: agendamiento autónomo, listado de citas, configuración, login")
+  Container(frontend, "Frontend Web", "Angular 22 (standalone components)", "SPA: inicio de sesión, registro de pacientes, agendamiento autónomo, mis citas, listado de citas y configuración; muestra solo las opciones del rol del usuario")
 
   Container(backend, "Backend API", "FastAPI (Python) - monolito modular", "Expone una única API REST (/api/v1/*). Internamente organiza los módulos appointment, configuration, medical_staff, patient e identity por capas (api/application/domain/infrastructure), comunicados entre sí por interfaces de Python y un event bus in-process (no por red)")
 
-  ContainerDb(db, "Base de Datos", "PostgreSQL", "Una sola instancia, un schema por módulo")
+  ContainerDb(db, "Base de Datos", "PostgreSQL 16", "Una sola instancia, un schema por módulo")
+
+  Container(keycloak, "Proveedor de Identidad", "Keycloak 26", "Realm piedrazul: usuarios, roles (paciente, agendador, medico, administrador) y emisión de tokens")
 }
 
 System_Ext(correo, "Servicio de Correo", "SMTP/API externo para recordatorios de citas (pendiente de integrar)")
@@ -24,10 +26,11 @@ Rel(agendador, frontend, "Usa", "HTTPS")
 Rel(medico, frontend, "Usa", "HTTPS")
 Rel(admin, frontend, "Usa", "HTTPS")
 
-Rel(frontend, backend, "Consume API REST", "HTTPS/JSON")
+Rel(frontend, backend, "Consume API REST con el token del usuario", "HTTPS/JSON")
 
 Rel(backend, db, "Lee/Escribe (SQLAlchemy)", "SQL")
-Rel(backend, correo, "Envía recordatorios", "SMTP/API")
+Rel(backend, keycloak, "Autentica usuarios, crea cuentas de pacientes y obtiene las llaves para validar tokens", "HTTP/OpenID Connect")
+Rel(backend, correo, "Enviará recordatorios", "SMTP/API")
 
 note right of backend
   A diferencia de los microservicios originales,
@@ -35,10 +38,10 @@ note right of backend
   separados por módulo: todos corren en el
   mismo proceso. La única interfaz REST
   expuesta es la del backend hacia el frontend;
-  la comunicación entre módulos internos
-  (p. ej. configuration -> medical_staff cuando
-  cambia un horario) es en memoria vía el
-  event bus, no HTTP.
+  los módulos se comunican en memoria mediante
+  sus interfaces públicas (p. ej. medical_staff
+  consulta el horario a configuration) y
+  publican eventos en el event bus, sin HTTP.
 end note
 
 @enduml

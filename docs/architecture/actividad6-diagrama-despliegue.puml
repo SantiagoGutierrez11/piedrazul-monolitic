@@ -1,4 +1,5 @@
 @startuml DiagramaDeDespliegue
+title Vista Física — Diagrama de Despliegue (Modelo 4+1)
 skinparam componentStyle uml2
 
 ' ==========================================
@@ -11,30 +12,50 @@ node "<<device>>\nDispositivo Cliente" as Cliente {
 }
 
 cloud "<<cloud>>\nCloud Provider" {
+  node "<<device>>\nServidor Web" as WebServer {
+    node "<<executionEnvironment>>\nnginx" as Nginx {
+      artifact "Build de producción de Angular" as AngularBuild <<artifact>>
+    }
+  }
+
   node "<<device>>\nServidor de Aplicaciones Backend" as AppServer {
-    node "<<executionEnvironment>>\nPython / Uvicorn Server" as PythonEnv {
-      artifact "FastAPI REST App (.py)" as BackendApp <<artifact>>
+    node "<<executionEnvironment>>\nPython 3.12 / Uvicorn" as PythonEnv {
+      artifact "FastAPI REST App (monolito modular)" as BackendApp <<artifact>>
+    }
+  }
+
+  node "<<device>>\nServidor de Identidad" as IdpServer {
+    node "<<executionEnvironment>>\nKeycloak 26" as KeycloakEnv {
+      artifact "Realm piedrazul (usuarios, roles)" as Realm <<artifact>>
     }
   }
 
   node "<<device>>\nServidor de Base de Datos" as DBServer {
-    node "<<executionEnvironment>>\nDBMS (PostgreSQL / MySQL)" as DBMS {
-      database "Base de Datos CitasMédicas" as DB
+    node "<<executionEnvironment>>\nPostgreSQL 16" as DBMS {
+      database "piedrazul (un schema por módulo)" as DB
     }
   }
 }
 
 cloud "<<external system>>\nServidor de Correo" as MailServer {
   node "<<executionEnvironment>>\nMail Service API / SMTP" as Engine {
-    component "Servicio de Envíos Email" as MailComponent
+    component "Servicio de Envíos Email\n(pendiente de integrar)" as MailComponent
   }
 }
 
 ' ==========================================
 ' CONEXIONES Y PROTOCOLOS
 ' ==========================================
-AngularApp -- BackendApp : HTTPS / REST (JSON)
-BackendApp -- DB : SQLAlchemy / AsyncPG (Puerto 5432/3306)
-BackendApp -- MailComponent : HTTPS / SMTPS (fastapi-mail)
+Navegador -- AngularBuild : HTTPS (descarga la SPA)
+AngularApp -- BackendApp : HTTPS / REST (JSON) + token Bearer
+BackendApp -- DB : SQLAlchemy + psycopg2 (Puerto 5432)
+BackendApp -- Realm : HTTP / OpenID Connect (Puerto 8080)
+BackendApp .. MailComponent : HTTPS / SMTPS (previsto)
+
+note bottom of AppServer
+  En desarrollo, los cuatro nodos del proveedor
+  corren como contenedores de docker-compose:
+  frontend (nginx), backend, keycloak y db.
+end note
 
 @enduml

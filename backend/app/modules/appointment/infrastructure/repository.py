@@ -1,10 +1,17 @@
 """Acceso a datos del schema `appointment`."""
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.modules.appointment.domain.entities import Appointment, AppointmentStatus, ServiceType
+from app.core.exceptions import ConflictError
+from app.modules.appointment.domain.entities import (
+    ACTIVE_STATUSES,
+    Appointment,
+    AppointmentStatus,
+    ServiceType,
+)
 from app.modules.appointment.infrastructure.models import AppointmentModel
 
 
@@ -20,6 +27,24 @@ class AppointmentRepository:
         ).all()
         return [self._to_entity(row) for row in rows]
 
+    def find_between(self, date_from: date, date_to: date) -> list[Appointment]:
+        rows = self._db.scalars(
+            select(AppointmentModel)
+            .where(AppointmentModel.date >= date_from, AppointmentModel.date <= date_to)
+            .order_by(AppointmentModel.date, AppointmentModel.start_time)
+        ).all()
+        return [self._to_entity(row) for row in rows]
+
+    def count_active_from(self, from_date: date) -> int:
+        return self._db.scalar(
+            select(func.count())
+            .select_from(AppointmentModel)
+            .where(
+                AppointmentModel.date >= from_date,
+                AppointmentModel.status.in_([status.value for status in ACTIVE_STATUSES]),
+            )
+        )
+
     def find_by_id(self, appointment_id: int) -> Appointment | None:
         row = self._db.get(AppointmentModel, appointment_id)
         return self._to_entity(row) if row else None
@@ -29,6 +54,28 @@ class AppointmentRepository:
             select(AppointmentModel)
             .where(AppointmentModel.patient_id == patient_id)
             .order_by(AppointmentModel.date.desc(), AppointmentModel.start_time)
+        ).all()
+        return [self._to_entity(row) for row in rows]
+
+    def find_active_by_patient(self, patient_id: int, from_date: date) -> list[Appointment]:
+        rows = self._db.scalars(
+            select(AppointmentModel)
+            .where(
+                AppointmentModel.patient_id == patient_id,
+                AppointmentModel.date >= from_date,
+                AppointmentModel.status.in_([status.value for status in ACTIVE_STATUSES]),
+            )
+            .order_by(AppointmentModel.date, AppointmentModel.start_time)
+        ).all()
+        return [self._to_entity(row) for row in rows]
+
+    def find_by_doctor_between(self, doctor_id: int, date_from: date, date_to: date) -> list[Appointment]:
+        rows = self._db.scalars(
+            select(AppointmentModel).where(
+                AppointmentModel.doctor_id == doctor_id,
+                AppointmentModel.date >= date_from,
+                AppointmentModel.date <= date_to,
+            )
         ).all()
         return [self._to_entity(row) for row in rows]
 
@@ -53,7 +100,12 @@ class AppointmentRepository:
         row.notes = appointment.notes
         row.status = appointment.status.value
 
-        self._db.commit()
+        try:
+            self._db.commit()
+        except IntegrityError as exc:
+            # Otra persona confirmó la misma franja justo antes (ver Vista de Procesos).
+            self._db.rollback()
+            raise ConflictError("Ese horario ya no está disponible. Por favor elige otro.") from exc
         self._db.refresh(row)
         return self._to_entity(row)
 

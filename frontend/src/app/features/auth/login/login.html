@@ -1,10 +1,106 @@
-<div class="login">
-  <div class="card">
-    <h1>Iniciar sesión</h1>
-    <p class="subtitle">Acceso al sistema de agendamiento Piedrazul.</p>
-    <p class="pendiente">
-      La autenticación todavía no está implementada; se conectará al módulo <code>identity</code>
-      del backend.
-    </p>
-  </div>
+<div class="auth-page">
+  <header class="auth-brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path
+          d="M12 20s-7-4.35-7-9a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 4.65-7 9-7 9Z"
+          stroke-linejoin="round"
+        />
+        <path d="M6 12.5h3l1.5-2.5 2 4 1.5-2.5h3" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </span>
+    <strong>Piedrazul</strong>
+    <small>Citas Médicas</small>
+  </header>
+
+  <section class="auth-card login-card">
+    <h1 class="titulo">Iniciar sesión</h1>
+
+    <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
+      <div class="field">
+        <label for="email">Correo electrónico <span class="required">*</span></label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="correo@ejemplo.com"
+          autocomplete="username"
+          [class.invalid]="mostrarError('email')"
+        />
+        @if (mostrarError('email')) {
+          <p class="field-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7.5v5.5M12 16.5v.01" stroke-linecap="round" />
+            </svg>
+            {{
+              form.controls.email.hasError('required')
+                ? 'El correo electrónico es obligatorio'
+                : 'Ingresa un correo válido, por ejemplo nombre@correo.com'
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Contraseña <span class="required">*</span></label>
+        <div class="password-input">
+          <input
+            id="password"
+            [type]="verPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            [class.invalid]="mostrarError('password')"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="verPassword.set(!verPassword())"
+            [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" stroke-linejoin="round" />
+              <circle cx="12" cy="12" r="3" />
+              @if (verPassword()) {
+                <path d="M4 4l16 16" stroke-linecap="round" />
+              }
+            </svg>
+          </button>
+        </div>
+        @if (mostrarError('password')) {
+          <p class="field-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7.5v5.5M12 16.5v.01" stroke-linecap="round" />
+            </svg>
+            La contraseña es obligatoria
+          </p>
+        }
+      </div>
+
+      <div class="options">
+        <label class="checkbox">
+          <input type="checkbox" formControlName="recordarme" />
+          Recordarme
+        </label>
+        <span class="link disabled" title="Disponible próximamente">¿Olvidaste tu contraseña?</span>
+      </div>
+
+      @if (aviso()) {
+        <p class="alert info">{{ aviso() }}</p>
+      }
+      @if (error()) {
+        <p class="alert error" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" class="submit" [disabled]="enviando()">
+        {{ enviando() ? 'Ingresando...' : 'Iniciar sesión' }}
+      </button>
+    </form>
+  </section>
+
+  <p class="auth-footer">
+    ¿No tienes cuenta?<a class="link" routerLink="/registro">Regístrate</a>
+  </p>
 </div>

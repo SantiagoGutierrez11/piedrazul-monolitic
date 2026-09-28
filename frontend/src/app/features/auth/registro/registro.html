@@ -1,0 +1,374 @@
+<ng-template #iconoError>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7.5v5.5M12 16.5v.01" stroke-linecap="round" />
+  </svg>
+</ng-template>
+
+<ng-template #iconoInfo>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5M12 7.5v.01" stroke-linecap="round" />
+  </svg>
+</ng-template>
+
+<ng-template #ojo let-visible>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" stroke-linejoin="round" />
+    <circle cx="12" cy="12" r="3" />
+    @if (visible) {
+      <path d="M4 4l16 16" stroke-linecap="round" />
+    }
+  </svg>
+</ng-template>
+
+<div class="auth-page">
+  <header class="auth-brand compact">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path
+          d="M12 20s-7-4.35-7-9a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 4.65-7 9-7 9Z"
+          stroke-linejoin="round"
+        />
+        <path d="M6 12.5h3l1.5-2.5 2 4 1.5-2.5h3" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </span>
+    <h1>Crear cuenta</h1>
+    <small>Regístrate para agendar tus citas médicas en Piedrazul</small>
+  </header>
+
+  <section class="auth-card registro-card">
+    <form [formGroup]="form" (ngSubmit)="crearCuenta()" novalidate>
+      <div class="grid">
+        <div class="field">
+          <label for="firstName">Primer nombre<span class="required">*</span></label>
+          <input
+            id="firstName"
+            formControlName="firstName"
+            placeholder="Ej. María"
+            autocomplete="given-name"
+            [class.invalid]="mostrarError('firstName')"
+          />
+          @if (mostrarError('firstName')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('firstName') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="middleName">Segundo nombre</label>
+          <input
+            id="middleName"
+            formControlName="middleName"
+            placeholder="Ej. Fernanda (opcional)"
+            autocomplete="additional-name"
+            [class.invalid]="mostrarError('middleName')"
+          />
+          @if (mostrarError('middleName')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('middleName') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="lastName">Primer apellido<span class="required">*</span></label>
+          <input
+            id="lastName"
+            formControlName="lastName"
+            placeholder="Ej. Gómez"
+            autocomplete="family-name"
+            [class.invalid]="mostrarError('lastName')"
+          />
+          @if (mostrarError('lastName')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('lastName') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="secondLastName">Segundo apellido</label>
+          <input
+            id="secondLastName"
+            formControlName="secondLastName"
+            placeholder="Ej. Rodríguez (opcional)"
+            [class.invalid]="mostrarError('secondLastName')"
+          />
+          @if (mostrarError('secondLastName')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('secondLastName') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">
+            Correo electrónico<span class="required">*</span>
+            <span
+              class="info"
+              tabindex="0"
+              role="img"
+              aria-label="Usarás este correo para iniciar sesión. Ejemplo: nombre@correo.com"
+              data-tip="Usarás este correo para iniciar sesión. Ejemplo: nombre@correo.com"
+              ><ng-container [ngTemplateOutlet]="iconoInfo"
+            /></span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="nombre@correo.com"
+            autocomplete="email"
+            [class.invalid]="mostrarError('email')"
+          />
+          @if (mostrarError('email')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('email') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="phone">
+            Teléfono<span class="required">*</span>
+            <span
+              class="info"
+              tabindex="0"
+              role="img"
+              aria-label="Número de celular o fijo, solo dígitos. Ejemplo: 300 123 4567"
+              data-tip="Número de celular o fijo, solo dígitos. Ejemplo: 300 123 4567"
+              ><ng-container [ngTemplateOutlet]="iconoInfo"
+            /></span>
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            placeholder="300 123 4567"
+            autocomplete="tel"
+            [class.invalid]="mostrarError('phone')"
+          />
+          @if (mostrarError('phone')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('phone') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="birthDate">
+            Fecha de nacimiento<span class="required">*</span>
+            <span
+              class="info"
+              tabindex="0"
+              role="img"
+              aria-label="Selecciónala en el calendario o escríbela como día/mes/año"
+              data-tip="Selecciónala en el calendario o escríbela como día/mes/año"
+              ><ng-container [ngTemplateOutlet]="iconoInfo"
+            /></span>
+          </label>
+          <input
+            id="birthDate"
+            type="date"
+            formControlName="birthDate"
+            min="1900-01-01"
+            [max]="hoy"
+            autocomplete="bday"
+            [class.invalid]="mostrarError('birthDate')"
+          />
+          @if (mostrarError('birthDate')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('birthDate') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="gender">Género<span class="required">*</span></label>
+          <select id="gender" formControlName="gender" [class.invalid]="mostrarError('gender')">
+            <option value="" disabled>Seleccionar...</option>
+            @for (genero of generos; track genero.value) {
+              <option [value]="genero.value">{{ genero.label }}</option>
+            }
+          </select>
+          @if (mostrarError('gender')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('gender') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="documentType">
+            Tipo de documento<span class="required">*</span>
+            <span
+              class="info"
+              tabindex="0"
+              role="img"
+              aria-label="Documento de identidad con el que te atienden en Piedrazul"
+              data-tip="Documento de identidad con el que te atienden en Piedrazul"
+              ><ng-container [ngTemplateOutlet]="iconoInfo"
+            /></span>
+          </label>
+          <select
+            id="documentType"
+            formControlName="documentType"
+            [class.invalid]="mostrarError('documentType')"
+          >
+            <option value="" disabled>Seleccionar...</option>
+            @for (tipo of tiposDocumento; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+          @if (mostrarError('documentType')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('documentType') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="documentNumber">
+            Número de documento<span class="required">*</span>
+            <span
+              class="info"
+              tabindex="0"
+              role="img"
+              aria-label="Solo números y letras, sin puntos ni espacios"
+              data-tip="Solo números y letras, sin puntos ni espacios"
+              ><ng-container [ngTemplateOutlet]="iconoInfo"
+            /></span>
+          </label>
+          <input
+            id="documentNumber"
+            formControlName="documentNumber"
+            placeholder="Ej. 1023456789"
+            [class.invalid]="mostrarError('documentNumber')"
+          />
+          @if (mostrarError('documentNumber')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('documentNumber') }}
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">
+            Contraseña<span class="required">*</span>
+            <span
+              class="info"
+              tabindex="0"
+              role="img"
+              aria-label="Mínimo 8 caracteres. Te recomendamos combinar letras y números"
+              data-tip="Mínimo 8 caracteres. Te recomendamos combinar letras y números"
+              ><ng-container [ngTemplateOutlet]="iconoInfo"
+            /></span>
+          </label>
+          <div class="password-input">
+            <input
+              id="password"
+              [type]="verPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Mínimo 8 caracteres"
+              autocomplete="new-password"
+              [class.invalid]="mostrarError('password')"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="verPassword.set(!verPassword())"
+              [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <ng-container
+                [ngTemplateOutlet]="ojo"
+                [ngTemplateOutletContext]="{ $implicit: verPassword() }"
+              />
+            </button>
+          </div>
+          @if (mostrarError('password')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('password') }}
+            </p>
+          } @else {
+            <small class="hint">Mínimo 8 caracteres.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirmar contraseña<span class="required">*</span></label>
+          <div class="password-input">
+            <input
+              id="confirmPassword"
+              [type]="verConfirmacion() ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="Repite tu contraseña"
+              autocomplete="new-password"
+              [class.invalid]="mostrarError('confirmPassword')"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="verConfirmacion.set(!verConfirmacion())"
+              [attr.aria-label]="verConfirmacion() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <ng-container
+                [ngTemplateOutlet]="ojo"
+                [ngTemplateOutletContext]="{ $implicit: verConfirmacion() }"
+              />
+            </button>
+          </div>
+          @if (mostrarError('confirmPassword')) {
+            <p class="field-error">
+              <ng-container [ngTemplateOutlet]="iconoError" />{{ mensaje('confirmPassword') }}
+            </p>
+          }
+        </div>
+      </div>
+
+      @if (error()) {
+        <p class="alert error" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" class="submit" [disabled]="enviando()">
+        {{ enviando() ? 'Creando cuenta...' : 'Crear cuenta' }}
+      </button>
+    </form>
+  </section>
+
+  <p class="auth-footer">
+    ¿Ya tienes cuenta?<a class="link" routerLink="/login">Inicia sesión</a>
+  </p>
+</div>
+
+@if (cuentaCreada()) {
+  <div class="modal-backdrop" (click)="cerrarConfirmacion()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-confirmacion"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        type="button"
+        class="modal__close"
+        (click)="cerrarConfirmacion()"
+        aria-label="Cerrar e ir a iniciar sesión"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+        </svg>
+      </button>
+      <span class="modal__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M8 12.5l2.5 2.5L16 9.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+      <h2 id="titulo-confirmacion">¡Cuenta Creada Exitosamente!</h2>
+      <p>Ya puedes iniciar sesión con tu correo y tu contraseña.</p>
+    </div>
+  </div>
+}

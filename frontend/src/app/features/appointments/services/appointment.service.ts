@@ -4,11 +4,13 @@ import { API_BASE_URL } from '../../../core/api-config';
 import {
   Appointment,
   AppointmentStatus,
-  CreateAppointmentRequest,
+  AppointmentSummary,
+  PatientBookingRequest,
+  SchedulingOptions,
   ServiceType,
 } from '../models/appointment.model';
 
-// Compartido por el listado de citas y el agendamiento — coordinar cambios aquí.
+// Compartido por el listado de citas, el agendamiento y las pantallas del paciente.
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
   private readonly http = inject(HttpClient);
@@ -32,15 +34,44 @@ export class AppointmentService {
     });
   }
 
-  create(payload: CreateAppointmentRequest) {
-    return this.http.post<Appointment>(this.baseUrl, payload);
+  // ---- Personal del centro (paneles)
+
+  listByDate(date: string, doctorId: number | null = null) {
+    const params = doctorId ? new HttpParams().set('doctor_id', doctorId) : new HttpParams();
+    return this.http.get<Appointment[]>(`${this.baseUrl}/date/${date}`, { params });
+  }
+
+  summary() {
+    return this.http.get<AppointmentSummary>(`${this.baseUrl}/summary`);
+  }
+
+  cancel(appointmentId: number) {
+    return this.http.patch<Appointment>(`${this.baseUrl}/${appointmentId}/cancel`, {});
+  }
+
+  attend(appointmentId: number) {
+    return this.http.patch<Appointment>(`${this.baseUrl}/${appointmentId}/attend`, {});
   }
 
   listByPatient(patientId: number) {
     return this.http.get<Appointment[]>(`${this.baseUrl}/patient/${patientId}`);
   }
 
-  cancel(appointmentId: number) {
-    return this.http.patch<Appointment>(`${this.baseUrl}/${appointmentId}/cancel`, {});
+  // ---- Paciente autenticado
+
+  mine() {
+    return this.http.get<Appointment[]>(`${this.baseUrl}/me`);
+  }
+
+  schedulingOptions() {
+    return this.http.get<SchedulingOptions>(`${this.baseUrl}/me/options`);
+  }
+
+  scheduleAutonomous(request: PatientBookingRequest) {
+    return this.http.post<Appointment>(`${this.baseUrl}/autonomous`, request);
+  }
+
+  cancelMine(appointmentId: number) {
+    return this.http.patch<Appointment>(`${this.baseUrl}/me/${appointmentId}/cancel`, {});
   }
 }
