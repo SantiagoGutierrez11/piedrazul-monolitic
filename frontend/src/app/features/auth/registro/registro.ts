@@ -33,8 +33,8 @@ export class Registro {
   readonly tiposDocumento = TIPOS_DOCUMENTO;
   readonly hoy = hoyLocal();
 
-  readonly verPassword = signal(false);
-  readonly verConfirmacion = signal(false);
+  readonly verPassword = signal(true);
+  readonly verConfirmacion = signal(true);
   readonly enviando = signal(false);
   readonly error = signal('');
   readonly cuentaCreada = signal(false);
