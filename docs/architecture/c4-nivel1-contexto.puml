@@ -1,27 +1,24 @@
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include <C4/C4_Context>
 
 LAYOUT_WITH_LEGEND()
 
 title Diagrama de Contexto - Sistema de Agendamiento de Citas Médicas Piedrazul (Monolito Modular)
 
-Person(paciente, "Paciente", "Agenda citas desde el portal web y consulta disponibilidad de médicos")
-Person(agendador, "Agendador", "Registra citas manualmente y gestiona la agenda")
-Person(medico, "Médico", "Consulta su agenda de citas")
-Person(admin, "Administrador", "Gestiona configuración del sistema y horarios por profesional")
+Person(paciente, "Paciente", "Crea su cuenta, agenda su cita de forma autónoma, consulta y cancela sus citas")
+Person(agendador, "Agendador", "Consulta la agenda de los profesionales; el registro manual de citas queda para la siguiente iteración")
+Person(medico, "Médico / Terapista", "Consulta su agenda, marca las citas atendidas y autoriza servicios especializados")
+Person(admin, "Administrador", "Configura la ventana de agendamiento y el horario de atención de cada profesional")
 
-System(piedrazul, "Sistema de Agendamiento\nPiedrazul", "Monolito modular (FastAPI + Angular) que gestiona citas médicas; los módulos internos se comunican por interfaces de Python y un event bus in-process")
+System(piedrazul, "Sistema de Agendamiento\nPiedrazul", "Monolito modular (Angular + FastAPI) con su base de datos PostgreSQL y su proveedor de identidad Keycloak; los módulos internos se comunican por interfaces de Python y un event bus en memoria")
 
-System_Ext(postgres, "PostgreSQL", "Base de datos relacional única, con un schema por módulo, para persistencia de pacientes, médicos, configuración y citas")
+System_Ext(correo, "Servicio de Correo", "Proveedor SMTP/API externo previsto para enviar recordatorios de citas (pendiente de integrar)")
 
-System_Ext(correo, "Servicio de Correo", "Proveedor SMTP/API externo usado para enviar recordatorios de citas por correo electrónico")
+Rel(paciente, piedrazul, "Se registra, agenda, consulta y cancela citas", "HTTPS")
+Rel(agendador, piedrazul, "Consulta la agenda de un profesional por fecha", "HTTPS")
+Rel(medico, piedrazul, "Consulta su agenda y registra la atención", "HTTPS")
+Rel(admin, piedrazul, "Configura parámetros y horarios", "HTTPS")
 
-Rel(paciente, piedrazul, "Agenda citas, consulta disponibilidad", "HTTPS/REST")
-Rel(agendador, piedrazul, "Registra citas manualmente, gestiona pacientes", "HTTPS/REST")
-Rel(medico, piedrazul, "Consulta agenda", "HTTPS/REST")
-Rel(admin, piedrazul, "Configura horarios y parámetros del sistema", "HTTPS/REST")
-
-Rel(piedrazul, postgres, "Lee/Escribe datos", "SQL")
-Rel(piedrazul, correo, "Envía recordatorios de citas", "SMTP/API")
+Rel(piedrazul, correo, "Enviará recordatorios de citas", "SMTP/API")
 
 @enduml

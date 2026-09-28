@@ -3,41 +3,51 @@ title Vista de Escenarios (+1) — Escenario crítico: "Paciente agenda una cita
 
 actor "Paciente" as P
 participant "Frontend Angular\n(asistente de agendamiento)" as UI
+participant "Módulo Appointment\n(plantilla + validadores)" as APP
 participant "Módulo Medical Staff\n(disponibilidad)" as MS
 participant "Módulo Configuration\n(horario del profesional)" as CFG
-participant "Módulo Appointment\n(plantilla + validadores)" as APP
 database "PostgreSQL" as BD
 
-P -> UI : Selecciona tipo de servicio y profesional
-UI -> MS : GET /api/v1/medical/availability?doctor_id&date
-MS -> CFG : Consulta horario configurado del profesional
-CFG --> MS : Días de atención, franja e intervalo
-MS -> BD : Consulta citas activas del profesional en la fecha
-BD --> MS : Citas ocupadas
-MS --> UI : Franjas libres
+P -> UI : Abre "Agendar Cita"
+UI -> APP : GET /api/v1/appointments/me/options
+APP --> UI : Servicios habilitados, autorización vigente y cita activa
+
+P -> UI : Paso 1: elige el servicio
+UI -> MS : GET /api/v1/medical/doctors/available?specialty=
+MS --> UI : Profesionales con su próxima fecha libre
+
+P -> UI : Paso 2: elige el profesional
+UI -> MS : GET /api/v1/medical/availability/calendar?doctor_id=
+MS -> CFG : Ventana de agendamiento y horario semanal
+MS -> APP : Horas ya ocupadas (AppointmentDirectory)
+MS --> UI : Días con cupos (sin festivos ni días sin atención)
+
+P -> UI : Paso 3: elige el día
+UI -> MS : GET /api/v1/medical/availability?doctor_id=&date=
+MS --> UI : Franjas del día, marcando las ocupadas
 
 group Flujo normal
-  P -> UI : Selecciona una franja libre y confirma
+  P -> UI : Paso 4: elige una franja libre y confirma
   UI -> APP : POST /api/v1/appointments/autonomous
   APP -> APP : Cadena de validaciones: datos, festivo, profesional\nactivo y de la especialidad, una cita activa, ventana,\nhorario del profesional, autorización médica y conflicto
   APP -> BD : INSERT de la cita (estado AGENDADA)
   BD --> APP : Cita registrada
   APP --> UI : 201 Created con los datos de la cita
-  UI --> P : Confirmación con fecha, hora y profesional
+  UI --> P : "¡Cita Agendada Exitosamente!" con el resumen
 end
 
 group Flujo alternativo: horario no disponible
-  P -> UI : Selecciona una franja que otro usuario acaba de reservar
+  P -> UI : Confirma una franja que otro paciente acaba de reservar
   UI -> APP : POST /api/v1/appointments/autonomous
-  APP -> APP : Valida conflicto de horario
-  APP --> UI : 409 con el mensaje de la regla incumplida
-  UI --> P : "Ese horario ya no está disponible", vuelve al paso de selección
+  APP -> APP : ConflictValidator (o la restricción única al hacer INSERT)
+  APP --> UI : 409 "Ese horario ya no está disponible"
+  UI -> MS : Recarga calendario y franjas del día
+  UI --> P : Vuelve al paso 3 con el mensaje y la disponibilidad actualizada
 end
 
 note over APP
-  Las validaciones se ejecutan en cadena
-  desde AppointmentSchedulingTemplate antes
-  de guardar; si una falla, no se persiste nada.
+  El paciente sale del token, no del cuerpo de la
+  petición. Si una validación falla, no se guarda nada.
 end note
 
 @enduml
