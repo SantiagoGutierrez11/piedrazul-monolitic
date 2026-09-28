@@ -33,7 +33,7 @@ Patient ..> Identity : usa interfaz (crea cuenta)
 Appointment ..> Shared : festivos y hora actual
 MedicalStaff ..> Shared : festivos y hora actual
 
-Appointment ..> Core : publica appointment.scheduled
+Appointment ..> Core : publica eventos de citas (agendada, cancelada, atendida)
 Configuration ..> Core : publica cambios de horario
 Identity --> Keycloak : OpenID Connect
 Core --> Keycloak : llaves públicas (JWKS)

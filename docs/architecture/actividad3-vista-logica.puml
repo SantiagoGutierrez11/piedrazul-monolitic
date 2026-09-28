@@ -89,7 +89,7 @@ package "Módulo Appointment" {
     + schedule() : None
     + reschedule() : None
     + cancel() : None
-    + mark_as_attended() : None
+    + mark_as_attended(today) : None
   }
 
   enum ServiceType {
