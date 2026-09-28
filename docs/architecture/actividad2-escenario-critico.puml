@@ -19,9 +19,7 @@ MS --> UI : Franjas libres
 group Flujo normal
   P -> UI : Selecciona una franja libre y confirma
   UI -> APP : POST /api/v1/appointments/autonomous
-  APP -> APP : Valida datos y fecha futura
-  APP -> APP : Valida conflicto de horario
-  APP -> APP : Valida límite de citas activas
+  APP -> APP : Cadena de validaciones: datos, festivo, profesional\nactivo y de la especialidad, una cita activa, ventana,\nhorario del profesional, autorización médica y conflicto
   APP -> BD : INSERT de la cita (estado AGENDADA)
   BD --> APP : Cita registrada
   APP --> UI : 201 Created con los datos de la cita

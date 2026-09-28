@@ -13,7 +13,7 @@ skinparam package {
     FontColor #1168BD
     FontStyle bold
 }
-title Diagrama de Clases - Nivel 4 (Código) - Módulo Appointment\nPatrones: Template Method, Strategy/Chain of Responsibility
+title Diagrama de Clases - Nivel 4 (Código) - Módulo Appointment\nPatrones: Template Method, Strategy/Chain of Responsibility, Builder
 
 package "Backend API - FastAPI (monolito)" <<Container>> {
 
@@ -31,10 +31,11 @@ package "Backend API - FastAPI (monolito)" <<Container>> {
         - reason : str
         - notes : str
         - status : AppointmentStatus
+        + is_active : bool
         + schedule() : None
         + reschedule() : None
         + cancel() : None
-        + mark_as_attended() : None
+        + mark_as_attended(today : date) : None
     }
 
     enum AppointmentStatus {
@@ -49,6 +50,35 @@ package "Backend API - FastAPI (monolito)" <<Container>> {
         FISIOTERAPIA
         QUIROPRAXIA
         TERAPIA_NEURAL
+        + label : str
+        + specialty : str
+        + requires_authorization : bool
+    }
+
+    class PatientAuthorization {
+        - patient_id : int
+        - service_type : ServiceType
+        - authorized_at : datetime
+        - expires_at : datetime
+        - used : bool
+        + {static} grant(Appointment, ServiceType, now) : PatientAuthorization
+        + is_active(now) : bool
+        + mark_used() : None
+    }
+
+    class AppointmentBuilder <<Builder>> {
+        + patient(id) : AppointmentBuilder
+        + doctor(id, name) : AppointmentBuilder
+        + service(ServiceType) : AppointmentBuilder
+        + slot(date, start, end) : AppointmentBuilder
+        + reason(text) : AppointmentBuilder
+        + notes(text) : AppointmentBuilder
+        + build() : Appointment
+    }
+
+    class AppointmentDirector <<Director>> {
+        + build_patient_appointment(...) : Appointment
+        + build_manual_appointment(...) : Appointment
     }
 
     abstract class AppointmentSchedulingTemplate <<Template Method>> {
@@ -66,62 +96,87 @@ package "Backend API - FastAPI (monolito)" <<Container>> {
         # _assign_status(Appointment) : None
     }
 
+    class SchedulePatientAppointment {
+        + execute(user_id, PatientBooking) : Appointment
+    }
+
     abstract class AppointmentValidator <<Strategy/Chain>> {
         + {abstract} validate(Appointment, list<Appointment>) : None
     }
 
-    class ConflictValidator {
-        + validate(Appointment, list<Appointment>) : None
-    }
-
-    class DataAppointmentValidator {
-        + validate(Appointment, list<Appointment>) : None
-    }
-
-    class ActiveAppointmentValidator {
-        + validate(Appointment, list<Appointment>) : None
-    }
+    class DataAppointmentValidator
+    class HolidayValidator
+    class ExistenceValidator
+    class ServiceOfferedValidator
+    class ActiveAppointmentValidator
+    class AppointmentWindowValidator
+    class WorkingHoursValidator
+    class MedicinaGeneralValidator
+    class ConflictValidator
 
     class AppointmentRepository {
         + find_by_doctor_and_date(int, date) : list<Appointment>
-        + find_by_id(int) : Appointment | None
-        + find_by_patient(int) : list<Appointment>
+        + find_active_by_patient(int, date) : list<Appointment>
+        + find_by_doctor_between(int, date, date) : list<Appointment>
         + save(Appointment) : Appointment
+    }
+
+    class AuthorizationRepository {
+        + find_active(patient_id, now) : PatientAuthorization | None
+        + save(PatientAuthorization) : PatientAuthorization
     }
 
     AppointmentSchedulingTemplate <|-- ManualAppointmentScheduling
     AppointmentSchedulingTemplate <|-- AutonomousAppointmentScheduling
-    AppointmentSchedulingTemplate --> Appointment
     AppointmentSchedulingTemplate --> AppointmentRepository
-    AppointmentSchedulingTemplate --> AppointmentValidator
-    AppointmentValidator <|.. ConflictValidator
+    AppointmentSchedulingTemplate --> "1..*" AppointmentValidator
+    SchedulePatientAppointment --> AppointmentDirector
+    SchedulePatientAppointment --> AutonomousAppointmentScheduling
+    SchedulePatientAppointment --> AuthorizationRepository
+    AppointmentDirector ..> AppointmentBuilder : usa
+    AppointmentBuilder ..> Appointment : crea
     AppointmentValidator <|.. DataAppointmentValidator
+    AppointmentValidator <|.. HolidayValidator
+    AppointmentValidator <|.. ExistenceValidator
+    AppointmentValidator <|.. ServiceOfferedValidator
     AppointmentValidator <|.. ActiveAppointmentValidator
+    AppointmentValidator <|.. AppointmentWindowValidator
+    AppointmentValidator <|.. WorkingHoursValidator
+    AppointmentValidator <|.. MedicinaGeneralValidator
+    AppointmentValidator <|.. ConflictValidator
+    MedicinaGeneralValidator --> AuthorizationRepository
     Appointment --> AppointmentStatus
     Appointment --> ServiceType
+    PatientAuthorization --> ServiceType
   }
 
-  package "core (transversal)" <<Módulo>> {
+  package "core y shared (transversal)" <<Módulo>> {
     class EventBus {
         + publish(event_name : str, payload : dict) : None
-        + subscribe(event_name : str, handler : Callable) : None
+    }
+    class ColombianHolidays {
+        + is_holiday(date) : bool
     }
   }
 }
 
 AppointmentSchedulingTemplate ..> EventBus : publica appointment.scheduled
+HolidayValidator --> ColombianHolidays
 
-note right of ConflictValidator
-  Cada regla vive en su propia clase y
-  el Template Method las ejecuta en cadena:
-  datos y fecha futura, conflicto de horario
-  y límite de citas activas por paciente.
+note right of AppointmentValidator
+  Cadena en este orden: datos, festivo,
+  existencia del profesional y del paciente,
+  especialidad, una cita activa por paciente,
+  ventana de agendamiento, horario del
+  profesional, autorización médica y
+  conflicto de horario.
 end note
 
-note right of AppointmentRepository
-  Implementado sobre SQLAlchemy contra
-  el schema appointment; recibe la sesión
-  por inyección de dependencias.
+note bottom of ExistenceValidator
+  Existencia, especialidad, ventana y horario
+  se consultan a los módulos medical_staff,
+  patient y configuration a través de sus
+  interfaces públicas (Protocol en domain/ports.py).
 end note
 
 @enduml

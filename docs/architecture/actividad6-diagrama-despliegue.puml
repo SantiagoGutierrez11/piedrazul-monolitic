@@ -17,6 +17,12 @@ cloud "<<cloud>>\nCloud Provider" {
     }
   }
 
+  node "<<device>>\nServidor de Identidad" as IdpServer {
+    node "<<executionEnvironment>>\nKeycloak 26" as KeycloakEnv {
+      artifact "Realm piedrazul (usuarios, roles)" as Realm <<artifact>>
+    }
+  }
+
   node "<<device>>\nServidor de Base de Datos" as DBServer {
     node "<<executionEnvironment>>\nDBMS (PostgreSQL / MySQL)" as DBMS {
       database "Base de Datos CitasMédicas" as DB
@@ -35,6 +41,7 @@ cloud "<<external system>>\nServidor de Correo" as MailServer {
 ' ==========================================
 AngularApp -- BackendApp : HTTPS / REST (JSON)
 BackendApp -- DB : SQLAlchemy / AsyncPG (Puerto 5432/3306)
+BackendApp -- Realm : HTTP / OpenID Connect (Puerto 8080)
 BackendApp -- MailComponent : HTTPS / SMTPS (fastapi-mail)
 
 @enduml
