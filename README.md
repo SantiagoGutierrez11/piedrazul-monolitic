@@ -1,4 +1,4 @@
-# Piedrazul — Monolito Modular
+# Piedrazul: Monolito Modular
 
 > Sistema de agendamiento de citas médicas · 2026.2, Corte 1
 
@@ -7,7 +7,7 @@ académico para Ingeniería de Software 3. Este repositorio contiene la versión
 **monolito modular**: un refactor de `../Mircoservicios/piedrazul` (arquitectura de
 microservicios con Spring Boot + React) hacia un único desplegable con backend en
 **FastAPI** (Python) y frontend en **Angular**, donde cada módulo de negocio conserva
-la misma separación en capas — dominio, aplicación e infraestructura — que tenía como
+la misma separación en capas (dominio, aplicación e infraestructura) que tenía como
 microservicio independiente.
 
 ---
@@ -15,7 +15,7 @@ microservicio independiente.
 ## Tabla de contenidos
 
 - [Ejecutar con Docker](#ejecutar-con-docker)
-- [Dueños por Corte 1](#dueños-por-corte-1)
+- [Responsables del Corte 1](#responsables-del-corte-1)
 - [Backend (FastAPI)](#backend-fastapi)
 - [Frontend (Angular 22)](#frontend-angular-22-standalone-components)
 - [Decisión de base de datos](#decisión-de-base-de-datos)
@@ -76,17 +76,17 @@ inicio de sesión; queda con el rol `paciente` en Keycloak.
 
 ---
 
-## Dueños por Corte 1
+## Responsables del Corte 1
 
-| Integrante | HU | Backend | Frontend |
+| Integrante | Historia de usuario | Backend | Frontend |
 |---|---|---|---|
-| Leyder Cerón | Agendamiento autónomo | `backend/app/modules/appointment/` (`scheduling/`, `validators/`, `builder/`) + `medical_staff/domain/factory/` | `frontend/src/app/features/appointments/agendamiento-autonomo/` |
-| Andrea Gómez | Listar citas | `backend/app/modules/appointment/api/routes.py` (`listByDoctorAndDate`) | `frontend/src/app/features/appointments/listar-citas/` |
-| Santiago Gutiérrez | Configuración del sistema | `backend/app/modules/configuration/` (+ apoyo en `medical_staff/`) | `frontend/src/app/features/configuration/` |
+| Leyder Cerón | Agendamiento autónomo | `appointment/application/scheduling/`, `appointment/domain/validators/`, `appointment/domain/builder/` y `medical_staff/domain/factory/` | `features/appointments/agendamiento-autonomo/` |
+| Andrea Gómez | Listar citas | `appointment/api/routes.py` y `appointment/application/list_appointments.py` | `features/appointments/listar-citas/` |
+| Santiago Gutiérrez | Configuración del sistema | `configuration/` (con apoyo en `medical_staff/`) | `features/configuration/` |
 
-**Compartido** (acordar quién lo arranca primero): `backend/app/core/` (config, DB,
-seguridad, event bus) y `frontend/src/app/core/` (interceptor JWT, guards) — las tres
-features dependen de esto para poder probar contra el backend real.
+Las carpetas `backend/app/core/` (configuración, base de datos, seguridad y eventos) y
+`frontend/src/app/core/` (interceptor del token y guards) las hicimos entre los tres,
+porque las tres historias las necesitaban para conectarse con el backend.
 
 ---
 
@@ -248,4 +248,4 @@ Una sola instancia **PostgreSQL**, con un schema por módulo (`appointment`,
 solo debe tocar su propio schema desde `infrastructure/`.
 
 Los scripts `init-*.sql` en `../Mircoservicios/piedrazul/docker/postgres/` sirven de
-base para los `CREATE TABLE` de cada schema — solo hay que adaptarlos.
+base para los `CREATE TABLE` de cada schema; solo hay que adaptarlos.
