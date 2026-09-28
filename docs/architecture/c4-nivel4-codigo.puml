@@ -74,6 +74,14 @@ package "Backend API - FastAPI (monolito)" <<Container>> {
         + validate(Appointment, list<Appointment>) : None
     }
 
+    class DataAppointmentValidator {
+        + validate(Appointment, list<Appointment>) : None
+    }
+
+    class ActiveAppointmentValidator {
+        + validate(Appointment, list<Appointment>) : None
+    }
+
     class AppointmentRepository {
         + find_by_doctor_and_date(int, date) : list<Appointment>
         + find_by_id(int) : Appointment | None
@@ -87,6 +95,8 @@ package "Backend API - FastAPI (monolito)" <<Container>> {
     AppointmentSchedulingTemplate --> AppointmentRepository
     AppointmentSchedulingTemplate --> AppointmentValidator
     AppointmentValidator <|.. ConflictValidator
+    AppointmentValidator <|.. DataAppointmentValidator
+    AppointmentValidator <|.. ActiveAppointmentValidator
     Appointment --> AppointmentStatus
     Appointment --> ServiceType
   }
@@ -102,13 +112,16 @@ package "Backend API - FastAPI (monolito)" <<Container>> {
 AppointmentSchedulingTemplate ..> EventBus : publica appointment.scheduled
 
 note right of ConflictValidator
-  Único validador implementado hoy;
-  Data/Existence/Window/Holiday: TODO.
+  Cada regla vive en su propia clase y
+  el Template Method las ejecuta en cadena:
+  datos y fecha futura, conflicto de horario
+  y límite de citas activas por paciente.
 end note
 
 note right of AppointmentRepository
-  Contrato definido; implementación
-  sobre SQLAlchemy: TODO.
+  Implementado sobre SQLAlchemy contra
+  el schema appointment; recibe la sesión
+  por inyección de dependencias.
 end note
 
 @enduml

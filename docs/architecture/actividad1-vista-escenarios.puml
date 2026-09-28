@@ -1,0 +1,61 @@
+@startuml CasosDeUsoPiedrazul
+title Vista de Escenarios (+1) — Diagrama de Casos de Uso (Modelo 4+1)
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Paciente" as Paciente
+actor "Agendador" as Agendador
+actor "Médico / Terapista" as Medico
+actor "Administrador" as Admin
+
+rectangle "Sistema de Agendamiento Piedrazul" {
+
+  usecase "Registrar paciente" as UC1
+  usecase "Iniciar sesión" as UC2
+  usecase "Agendar cita de\nmanera autónoma" as UC3
+  usecase "Agendar cita manual" as UC4
+  usecase "Consultar franjas\ndisponibles" as UC5
+  usecase "Consultar agenda\nmédica" as UC6
+  usecase "Cancelar cita" as UC7
+  usecase "Configurar parámetros\ndel sistema" as UC8
+  usecase "Configurar disponibilidad\ndel profesional" as UC9
+
+  UC3 ..> UC5 : <<include>>
+  UC4 ..> UC5 : <<include>>
+  UC9 ..> UC8 : <<extend>>
+}
+
+Paciente --> UC1
+Paciente --> UC2
+Paciente --> UC3
+Paciente --> UC6
+Paciente --> UC7
+
+Agendador --> UC2
+Agendador --> UC1
+Agendador --> UC4
+Agendador --> UC6
+Agendador --> UC7
+
+Medico --> UC2
+Medico --> UC6
+
+Admin --> UC2
+Admin --> UC8
+Admin --> UC9
+
+note bottom of UC3
+  Caso de uso crítico del corte.
+  Su flujo normal y alternativo se
+  detalla en actividad2-escenario-critico.puml.
+end note
+
+note bottom of UC6
+  Implementado en esta iteración:
+  listado por profesional y fecha
+  (GET /api/v1/appointments/doctor/{id}/date/{fecha}).
+end note
+
+@enduml
