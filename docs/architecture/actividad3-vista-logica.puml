@@ -18,10 +18,31 @@ package "Módulo Patient" {
   class Patient {
     - patient_id : int
     - first_name : str
+    - middle_name : str
     - last_name : str
+    - second_last_name : str
     - phone : str
+    - email : str
+    - birth_date : date
+    - gender : Gender
+    - document_type : DocumentType
+    - document_number : str
+    - user_id : str
     --
     + full_name : str
+  }
+
+  enum Gender {
+    FEMENINO
+    MASCULINO
+    OTRO
+  }
+
+  enum DocumentType {
+    CC
+    TI
+    CE
+    PA
   }
 }
 
@@ -84,6 +105,19 @@ package "Módulo Appointment" {
     ATENDIDA
     CANCELADA
   }
+
+  class PatientAuthorization {
+    - authorization_id : int
+    - patient_id : int
+    - service_type : ServiceType
+    - authorized_at : datetime
+    - expires_at : datetime
+    - authorized_by_doctor_id : int
+    - appointment_id : int
+    - used : bool
+    --
+    + is_active(now) : bool
+  }
 }
 
 Patient "1" -- "0..*" Appointment : solicita >
@@ -91,6 +125,11 @@ Doctor "1" -- "0..*" Appointment : atiende >
 Doctor "1" -- "0..7" DoctorScheduleConfiguration : tiene configurado >
 Appointment "1" --> "1" ServiceType
 Appointment "1" --> "1" AppointmentStatus
+Patient "1" -- "0..*" PatientAuthorization : recibe >
+Appointment "1" -- "0..1" PatientAuthorization : otorga >
+PatientAuthorization "1" --> "1" ServiceType
+Patient --> Gender
+Patient --> DocumentType
 
 note bottom of Appointment
   La relación con Patient y Doctor se
@@ -100,6 +139,18 @@ note bottom of Appointment
   y los datos del paciente se resuelven a
   través de la interfaz pública del módulo
   Patient (PatientDirectory).
+end note
+
+note right of PatientAuthorization
+  La otorga el médico al atender una
+  Consulta General; habilita un servicio
+  especializado, se usa una sola vez y
+  caduca al mes.
+end note
+
+note left of Patient
+  user_id enlaza al paciente con su
+  cuenta de acceso en Keycloak.
 end note
 
 note right of SystemParameter

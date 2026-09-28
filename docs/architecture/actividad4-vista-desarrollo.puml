@@ -11,7 +11,10 @@ package "Backend - Monolito modular (FastAPI)" {
   [Patient] as Patient
   [Identity] as Identity
   [core (Event Bus, Security, DB Session)] as Core
+  [shared (festivos, reloj)] as Shared
 }
+
+cloud "Keycloak\n(proveedor de identidad)" as Keycloak
 
 database "Base de datos\n(PostgreSQL, 1 schema por módulo)" as BD
 
@@ -21,19 +24,24 @@ Cliente --> Identity : HTTP / REST
 Cliente --> Configuration : HTTP / REST
 Cliente --> MedicalStaff : HTTP / REST
 
-Appointment ..> MedicalStaff : usa interfaz (disponibilidad)
-Appointment ..> Patient : usa interfaz (valida paciente)
+Appointment ..> MedicalStaff : usa interfaz (valida profesional)
+Appointment ..> Patient : usa interfaz (resuelve paciente)
+Appointment ..> Configuration : usa interfaz (ventana y horario)
 MedicalStaff ..> Configuration : usa interfaz (horario configurado)
+MedicalStaff ..> Appointment : usa interfaz (horas ocupadas)
+Patient ..> Identity : usa interfaz (crea cuenta)
+Appointment ..> Shared : festivos y hora actual
+MedicalStaff ..> Shared : festivos y hora actual
 
 Appointment ..> Core : publica appointment.scheduled
 Configuration ..> Core : publica cambios de horario
-MedicalStaff ..> Core : se suscribe a eventos
+Identity --> Keycloak : OpenID Connect
+Core --> Keycloak : llaves públicas (JWKS)
 
 Appointment --> BD
 MedicalStaff --> BD
 Configuration --> BD
 Patient --> BD
-Identity --> BD
 
 note bottom of Core
   Comunicación entre módulos vía

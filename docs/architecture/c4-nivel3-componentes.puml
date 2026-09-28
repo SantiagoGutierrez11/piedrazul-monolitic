@@ -6,19 +6,20 @@ title Diagrama de Componentes - Backend API (Monolito Modular) - Nivel 3
 Container_Ext(frontend, "Frontend Web", "Angular", "Consume la API REST")
 ContainerDb_Ext(postgres, "PostgreSQL", "Relational DB", "Un schema por módulo")
 System_Ext(correo, "Servicio de Correo", "SMTP/API", "Recordatorios (pendiente)")
+Container_Ext(keycloak, "Proveedor de Identidad", "Keycloak 26", "Usuarios, roles y emisión de tokens del realm piedrazul")
 
 Container_Boundary(backend, "Backend API - FastAPI") {
 
     Component(config, "Settings", "pydantic-settings", "Configuración central del backend (URL de BD, secretos, nombre de la app) leída desde variables de entorno")
     Component(db_session, "Database Session", "SQLAlchemy engine/session", "Entrega una sesión de base de datos por cada request y la cierra al finalizar")
     Component(event_bus, "Event Bus", "pub/sub in-process", "Permite que un módulo publique un evento y otro reaccione, sin conocerse ni depender de red (reemplaza el RabbitMQ de microservicios)")
-    Component(security, "Security", "OAuth2 / JWT", "Extrae y valida el usuario autenticado y su rol en cada request (placeholder hasta integrar Keycloak)")
+    Component(security, "Security", "OAuth2 / JWT", "Valida firma, emisor, audiencia y expiración de los tokens de Keycloak y exige el rol de cada ruta")
 
     Component(appointment_mod, "Appointment", "Módulo de negocio", "Gestiona el ciclo de vida de las citas médicas: agendamiento manual y autónomo, validación de conflictos de horario, cancelación y consulta de agenda por médico/fecha")
     Component(configuration_mod, "Configuration", "Módulo de negocio", "Administra los parámetros generales del sistema y el horario de atención de cada profesional; notifica al resto del sistema cuando algo cambia")
     Component(medical_mod, "Medical Staff", "Módulo de negocio", "Gestiona los datos de los médicos y calcula sus horarios (slots) disponibles combinando su configuración con las citas ya ocupadas")
     Component(patient_mod, "Patient", "Módulo de negocio", "Gestiona el registro y los datos de los pacientes")
-    Component(identity_mod, "Identity", "Módulo de negocio", "Gestiona los usuarios del sistema y su autenticación (integración real con Keycloak prevista para el Corte 2)")
+    Component(identity_mod, "Identity", "Módulo de negocio", "Inicio, renovación y cierre de sesión contra Keycloak; crea las cuentas de acceso de los pacientes")
 }
 
 Rel(frontend, appointment_mod, "Agenda, cancela y consulta citas", "HTTPS/JSON")
@@ -29,13 +30,19 @@ Rel(frontend, identity_mod, "Inicia sesión", "HTTPS/JSON")
 
 Rel(appointment_mod, event_bus, "Publica appointment.scheduled")
 Rel(configuration_mod, event_bus, "Publica cambios de horario/configuración")
-Rel(medical_mod, event_bus, "Se suscribe a eventos de citas y configuración")
+Rel(appointment_mod, medical_mod, "Valida el profesional (DoctorDirectory)")
+Rel(appointment_mod, patient_mod, "Resuelve el paciente autenticado (PatientDirectory)")
+Rel(appointment_mod, configuration_mod, "Ventana y horario del profesional (ConfigurationDirectory)")
+Rel(medical_mod, configuration_mod, "Horario configurado para calcular franjas (ConfigurationDirectory)")
+Rel(medical_mod, appointment_mod, "Horas ya ocupadas (AppointmentDirectory)")
+Rel(patient_mod, identity_mod, "Crea la cuenta del paciente (AccountDirectory)")
 
 Rel(appointment_mod, db_session, "Lee/Escribe schema appointment")
 Rel(configuration_mod, db_session, "Lee/Escribe schema configuration")
 Rel(medical_mod, db_session, "Lee/Escribe schema medical_staff")
 Rel(patient_mod, db_session, "Lee/Escribe schema patient")
-Rel(identity_mod, db_session, "Lee/Escribe schema identity")
+Rel(identity_mod, keycloak, "Login, renovación de sesión y creación de usuarios", "HTTP/OpenID Connect")
+Rel(security, keycloak, "Obtiene las llaves públicas (JWKS)", "HTTP")
 Rel(db_session, postgres, "SQL")
 
 Rel(appointment_mod, security, "Valida token / rol")
