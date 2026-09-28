@@ -145,17 +145,51 @@ pytest
 Cubren las reglas del validador de conflictos, la configuración del sistema
 (`tests/modules/configuration/`), el listado de citas (`tests/modules/appointment/`), la
 validación de tokens y los permisos por rol (`tests/core/`), el adaptador de Keycloak y el
-inicio de sesión (`tests/modules/identity/`) y el registro de pacientes
-(`tests/modules/patient/`). No necesitan Keycloak: usan tokens firmados con una llave de
-prueba y un proveedor de identidad en memoria.
+inicio de sesión (`tests/modules/identity/`), el registro de pacientes
+(`tests/modules/patient/`), la cadena de validación y el agendamiento autónomo
+(`tests/modules/appointment/`), la disponibilidad (`tests/modules/medical_staff/`) y los
+festivos (`tests/shared/`). No necesitan Keycloak: usan tokens firmados con una llave de
+prueba y un proveedor de identidad en memoria. Las del agendamiento fijan la fecha en el
+lunes 9 de marzo de 2026 para que festivos y fines de semana sean predecibles.
+
+### Agendamiento autónomo
+
+El paciente agenda su propia cita en cuatro pasos: servicio, profesional, fecha y hora, y
+confirmación. Antes de guardarla, el backend aplica en orden la cadena de validadores de
+`appointment/domain/validators/`:
+
+1. Datos coherentes, cita en el futuro y motivo de al menos 5 caracteres.
+2. No es festivo en Colombia.
+3. El paciente existe y el profesional existe y está activo.
+4. El profesional pertenece a la especialidad del servicio.
+5. El paciente no tiene otra cita activa (agendada o reagendada).
+6. La fecha está dentro de la ventana de agendamiento configurada.
+7. La hora coincide con una franja del horario configurado del profesional.
+8. Los servicios especializados exigen una autorización médica vigente: el médico la
+   otorga al atender una Consulta General, se usa una sola vez y caduca al mes.
+9. Nadie más tiene esa franja (la restricción única de la base cubre las reservas simultáneas).
+
+| Endpoint | Rol | Uso |
+|---|---|---|
+| `GET /api/v1/appointments/me/options` | Paciente | Servicios habilitados, autorización vigente y cita activa |
+| `GET /api/v1/medical/doctors/available?specialty=` | Cualquiera | Profesionales de la especialidad con su próxima fecha libre |
+| `GET /api/v1/medical/availability/calendar?doctor_id=` | Cualquiera | Días de la ventana con cupos libres |
+| `GET /api/v1/medical/availability?doctor_id=&date=` | Cualquiera | Franjas del día, marcando las ocupadas |
+| `POST /api/v1/appointments/autonomous` | Paciente | Agenda la cita; el paciente se toma del token |
+| `GET /api/v1/appointments/me` | Paciente | Citas del paciente |
+| `PATCH /api/v1/appointments/me/{id}/cancel` | Paciente | Cancela una cita propia |
+| `PATCH /api/v1/appointments/{id}/attend` | Médico | Marca la cita como atendida y opcionalmente autoriza un servicio |
+
+La fecha y la hora "actuales" se calculan en la zona horaria de Colombia (`TIMEZONE`, por
+defecto `America/Bogota`), aunque el contenedor corra en UTC.
 
 ### Estado de los módulos
 
 | Módulo | Estado |
 |---|---|
-| `appointment` | Listado por médico/fecha y por paciente, con filtros de servicio y estado. Agendamiento autónomo (`POST /autonomous`) con cadena de validadores |
+| `appointment` | Listado por médico/fecha y por paciente, con filtros de servicio y estado. Agendamiento autónomo con cadena de validadores, Builder, autorización médica y cancelación por el paciente |
 | `configuration` | Ventana de agendamiento y horario semanal por profesional |
-| `medical_staff` | Registro de profesionales y cálculo de horarios disponibles |
+| `medical_staff` | Registro de profesionales y cálculo de franjas, días disponibles y próxima fecha libre a partir del horario configurado |
 | `patient` | Registro de pacientes con su cuenta de acceso (`POST /register`) y perfil propio (`GET /me`); expone un directorio consultado por el módulo de citas |
 | `identity` | Inicio, renovación y cierre de sesión contra Keycloak (`/api/v1/auth`); crea las cuentas de los pacientes |
 
@@ -168,7 +202,7 @@ frontend/src/app/
 ├── core/                    # api-config.ts, auth/ (sesión y roles), interceptors/auth-interceptor.ts,
 │                            # guards/auth-guards.ts
 ├── layout/shell/            # barra lateral según el rol del usuario
-├── shared/                  # (vacío a propósito — mover aquí lo que se repita entre features)
+├── shared/                  # fechas en español, mensajes de error y diálogo de confirmación
 └── features/
     ├── appointments/
     │   ├── listar-citas/            <- Andrea
@@ -180,6 +214,7 @@ frontend/src/app/
     │   ├── configuracion-profesional/  <- Santiago
     │   └── services/configuration.service.ts
     ├── medical-staff/           # servicio de apoyo (médicos, disponibilidad)
+    ├── patient/                 # inicio/ y mis-citas/ del paciente
     └── auth/                    # login/ (pestañas Paciente y Profesional) y registro/
 ```
 
@@ -199,7 +234,7 @@ Las rutas están conectadas con lazy loading en `app.routes.ts`:
 |---|---|
 | `/login`, `/registro` | Sin sesión |
 | `/appointments/listar` | Agendador, médico y administrador |
-| `/appointments/agendar` | Paciente y agendador |
+| `/paciente/inicio`, `/paciente/citas`, `/appointments/agendar` | Paciente |
 | `/configuration`, `/configuration/global`, `/configuration/profesional` | Administrador |
 
 Al iniciar sesión cada usuario llega a su pantalla principal según su rol.
