@@ -1,0 +1,124 @@
+<header class="panel-header">
+  <div>
+    <h1>{{ titulo() }}</h1>
+    <p class="subtitle">{{ fechaTexto() }}</p>
+  </div>
+  <button type="button" disabled title="Pendiente de implementar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+    </svg>
+    Registrar nueva cita
+  </button>
+</header>
+
+@if (proxima(); as cita) {
+  <section class="card banner">
+    <span class="banner__etiqueta">Próxima cita</span>
+    <strong>{{ horaAmPm(cita.startTime) }}</strong>
+    <span>{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</span>
+    <span class="banner__detalle">{{ cita.doctorName }} · {{ servicios[cita.serviceType] }}</span>
+  </section>
+}
+
+<section class="stats">
+  <div class="card stat">
+    <small>Citas {{ fecha() === hoy ? 'hoy' : 'del día' }}</small>
+    <strong>{{ total() }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Agendadas</small>
+    <strong class="ok">{{ activas().length }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Canceladas</small>
+    <strong class="danger">{{ canceladas() }}</strong>
+  </div>
+</section>
+
+<div class="filtros">
+  <label>
+    Profesional
+    <select [ngModel]="medicoId() ?? ''" (ngModelChange)="cambiarMedico($event)">
+      <option value="">Todos los profesionales</option>
+      @for (medico of medicos(); track medico.doctorId) {
+        <option [value]="medico.doctorId">{{ medico.fullName }} · {{ medico.specialty }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    Fecha
+    <input type="date" [ngModel]="fecha()" (ngModelChange)="cambiarFecha($event)" />
+  </label>
+</div>
+
+@if (aviso()) {
+  <p class="alert ok" role="status">{{ aviso() }}</p>
+}
+@if (error()) {
+  <p class="alert error" role="alert">{{ error() }}</p>
+}
+
+<section class="card bloque">
+  @if (citas() === null) {
+    <p class="vacio">Cargando la agenda...</p>
+  } @else if (citas()!.length === 0) {
+    <p class="vacio">No hay citas para esta fecha.</p>
+  } @else {
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Paciente</th>
+            <th>Teléfono</th>
+            <th>Profesional</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cita of citas(); track cita.appointmentId) {
+            <tr>
+              <td class="hora">{{ horaAmPm(cita.startTime) }}</td>
+              <td>{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</td>
+              <td>{{ cita.patientPhone ?? '—' }}</td>
+              <td>{{ cita.doctorName }}</td>
+              <td>{{ servicios[cita.serviceType] }}</td>
+              <td>
+                <span class="badge badge--{{ cita.status.toLowerCase() }}">{{
+                  estados[cita.status]
+                }}</span>
+              </td>
+              <td class="acciones">
+                <button type="button" class="secondary" disabled title="Pendiente de implementar">
+                  Reagendar
+                </button>
+                <button
+                  type="button"
+                  class="secondary cancelar"
+                  [disabled]="!esActiva(cita)"
+                  (click)="porCancelar.set(cita)"
+                >
+                  Cancelar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (porCancelar()) {
+  <app-confirm-dialog
+    titulo="¿Cancelar la cita?"
+    [mensaje]="mensajeCancelacion()"
+    textoConfirmar="Sí, cancelar cita"
+    textoCancelar="No, volver"
+    [ocupado]="cancelando()"
+    (confirmar)="confirmarCancelacion()"
+    (cancelar)="porCancelar.set(null)"
+  />
+}

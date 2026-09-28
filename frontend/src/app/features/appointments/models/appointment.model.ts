@@ -33,6 +33,13 @@ export interface Appointment {
   status: AppointmentStatus;
 }
 
+// GET /appointments/summary: indicadores de los paneles del agendador y el administrador.
+export interface AppointmentSummary {
+  today: number;
+  pending: number;
+  week: { date: string; count: number }[];
+}
+
 // Cuerpo de POST /appointments/autonomous: el paciente sale del token, no se envía.
 export interface PatientBookingRequest {
   doctorId: number;

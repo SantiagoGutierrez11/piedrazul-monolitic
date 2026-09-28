@@ -82,10 +82,13 @@ export class AuthService {
   /** Pantalla inicial según el rol del usuario. */
   homeUrl(): string {
     if (this.hasRole('administrador')) {
-      return '/configuration';
+      return '/panel/admin';
     }
-    if (this.hasRole('agendador', 'medico')) {
-      return '/appointments/listar';
+    if (this.hasRole('agendador')) {
+      return '/panel/agenda';
+    }
+    if (this.hasRole('medico')) {
+      return '/panel/medico';
     }
     if (this.hasRole('paciente')) {
       return '/paciente/inicio';

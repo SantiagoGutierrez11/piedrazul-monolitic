@@ -16,6 +16,7 @@ function renderFor(roles: Role[], fullName = 'Admin Sistema'): HTMLElement {
         useValue: {
           user,
           hasRole: (...allowed: Role[]) => allowed.some((role) => roles.includes(role)),
+          homeUrl: () => (roles.includes('paciente') ? '/paciente/inicio' : `/panel/${roles[0]}`),
           logout: () => undefined,
         },
       },
@@ -30,6 +31,7 @@ describe('Shell', () => {
   it('shows the administration options to an administrator', () => {
     const nav = renderFor(['administrador']).querySelector('nav')!.textContent!;
 
+    expect(nav).toContain('Panel de Citas');
     expect(nav).toContain('Listar Citas');
     expect(nav).toContain('Configuración');
     expect(nav).not.toContain('Agendar Cita');
@@ -42,6 +44,15 @@ describe('Shell', () => {
     expect(nav).toContain('Agendar Cita');
     expect(nav).toContain('Mis Citas');
     expect(nav).not.toContain('Listar Citas');
+    expect(nav).not.toContain('Configuración');
+  });
+
+  it('shows the doctor their own consultation section', () => {
+    const nav = renderFor(['medico'], 'Laura Muñoz').querySelector('nav')!.textContent!;
+
+    expect(nav).toContain('Mi consulta');
+    expect(nav).toContain('Panel de Citas');
+    expect(nav).toContain('Mi agenda');
     expect(nav).not.toContain('Configuración');
   });
 

@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../../../core/api-config';
 import {
   Appointment,
   AppointmentStatus,
+  AppointmentSummary,
   PatientBookingRequest,
   SchedulingOptions,
   ServiceType,
@@ -31,6 +32,25 @@ export class AppointmentService {
     return this.http.get<Appointment[]>(`${this.baseUrl}/doctor/${doctorId}/date/${date}`, {
       params,
     });
+  }
+
+  // ---- Personal del centro (paneles)
+
+  listByDate(date: string, doctorId: number | null = null) {
+    const params = doctorId ? new HttpParams().set('doctor_id', doctorId) : new HttpParams();
+    return this.http.get<Appointment[]>(`${this.baseUrl}/date/${date}`, { params });
+  }
+
+  summary() {
+    return this.http.get<AppointmentSummary>(`${this.baseUrl}/summary`);
+  }
+
+  cancel(appointmentId: number) {
+    return this.http.patch<Appointment>(`${this.baseUrl}/${appointmentId}/cancel`, {});
+  }
+
+  attend(appointmentId: number) {
+    return this.http.patch<Appointment>(`${this.baseUrl}/${appointmentId}/attend`, {});
   }
 
   listByPatient(patientId: number) {

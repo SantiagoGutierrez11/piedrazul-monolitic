@@ -1,0 +1,87 @@
+<header class="panel-header">
+  <div>
+    <h1>{{ saludo() }}, {{ nombre() }}</h1>
+    <p class="subtitle">
+      Hoy es {{ hoy }}
+      @if (medico(); as m) {
+        · {{ m.specialty }}
+      }
+    </p>
+  </div>
+</header>
+
+@if (error()) {
+  <p class="alert error" role="alert">{{ error() }}</p>
+}
+
+<section class="stats">
+  <div class="card stat">
+    <small>Pacientes hoy</small>
+    <strong>{{ total() }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Atendidos</small>
+    <strong class="ok">{{ atendidas() }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Pendientes</small>
+    <strong class="warn">{{ pendientes().length }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Próximo paciente</small>
+    <strong>{{ proxima() ? horaAmPm(proxima()!.startTime) : '—' }}</strong>
+  </div>
+</section>
+
+<div class="panel-grid">
+  <section class="card bloque">
+    <h2 class="bloque__titulo">Próxima cita</h2>
+    @if (citas() === null) {
+      <p class="vacio">Cargando tu agenda...</p>
+    } @else if (proxima(); as cita) {
+      <div class="proxima">
+        <p class="proxima__hora">{{ horaAmPm(cita.startTime) }}</p>
+        <p class="proxima__paciente">{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</p>
+        <p class="proxima__servicio">{{ servicios[cita.serviceType] }}</p>
+        @if (cita.reason) {
+          <p class="proxima__motivo"><small>Motivo</small>{{ cita.reason }}</p>
+        }
+        <button
+          type="button"
+          (click)="marcarAtendida(cita)"
+          [disabled]="atendiendo() === cita.appointmentId"
+        >
+          {{ atendiendo() === cita.appointmentId ? 'Guardando...' : 'Marcar como atendida' }}
+        </button>
+      </div>
+    } @else {
+      <p class="vacio">No tienes más citas pendientes hoy.</p>
+    }
+  </section>
+
+  <section class="card bloque">
+    <h2 class="bloque__titulo">Tu día</h2>
+    <ol class="timeline">
+      @for (franja of agenda(); track franja.hora) {
+        <li [class.libre]="!franja.cita" [class.hecha]="franja.cita?.status === 'ATENDIDA'">
+          <span class="timeline__hora">{{ horaAmPm(franja.hora) }}</span>
+          @if (franja.cita; as cita) {
+            <span class="timeline__detalle">
+              <strong>{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</strong>
+              <small>{{ servicios[cita.serviceType] }}</small>
+            </span>
+            <span class="badge badge--{{ cita.status.toLowerCase() }}">{{
+              cita.status === 'ATENDIDA' ? 'Atendida' : 'Pendiente'
+            }}</span>
+          } @else {
+            <span class="timeline__detalle"><small>Disponible</small></span>
+          }
+        </li>
+      } @empty {
+        @if (citas() !== null) {
+          <li class="libre"><small>No tienes horario de atención hoy.</small></li>
+        }
+      }
+    </ol>
+  </section>
+</div>
