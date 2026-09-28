@@ -8,3 +8,5 @@ class Doctor:
     full_name: str
     specialty: str
     active: bool = True
+    # Cuenta de Keycloak del profesional; vacía si aún no tiene usuario.
+    user_id: str | None = None

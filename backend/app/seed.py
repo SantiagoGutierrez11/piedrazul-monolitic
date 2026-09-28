@@ -26,8 +26,16 @@ from app.modules.patient.infrastructure.repository import PatientRepository
 from app.shared.clock import SystemClock
 from app.shared.holidays import ColombianHolidays
 
+# Cuenta medico@piedrazul.com del realm de Keycloak.
+DEMO_DOCTOR_USER_ID = "9c4a7e36-1d2b-4e8f-a5c3-7f6e8d2b4a03"
+
 DOCTORS = [
-    Doctor(doctor_id=1, full_name="Dra. Laura Muñoz", specialty="Medicina General"),
+    Doctor(
+        doctor_id=1,
+        full_name="Dra. Laura Muñoz",
+        specialty="Medicina General",
+        user_id=DEMO_DOCTOR_USER_ID,
+    ),
     Doctor(doctor_id=2, full_name="Dr. Juan Pérez", specialty="Fisioterapia"),
     Doctor(doctor_id=3, full_name="Dra. Ana Soto", specialty="Quiropraxia"),
 ]

@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.exceptions import NotFoundError
+from app.core.security import CurrentUser, Role, get_current_user, require_role
 from app.modules.appointment.application.directory import AppointmentDirectory
 from app.modules.appointment.infrastructure.repository import AppointmentRepository
 from app.modules.configuration.application.directory import ConfigurationDirectory
@@ -45,6 +46,18 @@ def get_availability_service(
 def list_doctors(specialty: str | None = None, repository: DoctorRepository = Depends(get_repository)):
     doctors = repository.find_active_by_specialty(specialty) if specialty else repository.find_all_active()
     return [DoctorResponse.model_validate(doctor) for doctor in doctors]
+
+
+@router.get("/doctors/me", response_model=DoctorResponse)
+def my_doctor_profile(
+    user: CurrentUser = Depends(require_role(Role.MEDICO)),
+    repository: DoctorRepository = Depends(get_repository),
+):
+    """Profesional asociado a la cuenta del médico autenticado."""
+    doctor = repository.find_by_user_id(user.user_id)
+    if doctor is None:
+        raise NotFoundError("Tu cuenta no está asociada a un profesional")
+    return DoctorResponse.model_validate(doctor)
 
 
 @router.get("/doctors/available", response_model=list[AvailableDoctorResponse])
