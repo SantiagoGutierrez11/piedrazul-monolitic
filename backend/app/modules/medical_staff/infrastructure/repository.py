@@ -24,6 +24,10 @@ class DoctorRepository:
         ).all()
         return [self._to_entity(row) for row in rows]
 
+    def find_by_user_id(self, user_id: str) -> Doctor | None:
+        row = self._db.scalars(select(DoctorModel).where(DoctorModel.user_id == user_id)).first()
+        return self._to_entity(row) if row else None
+
     def find_by_id(self, doctor_id: int) -> Doctor | None:
         row = self._db.get(DoctorModel, doctor_id)
         return self._to_entity(row) if row else None
@@ -37,6 +41,7 @@ class DoctorRepository:
         row.full_name = doctor.full_name
         row.specialty = doctor.specialty
         row.active = doctor.active
+        row.user_id = doctor.user_id
 
         self._db.commit()
         self._db.refresh(row)
@@ -49,4 +54,5 @@ class DoctorRepository:
             full_name=row.full_name,
             specialty=row.specialty,
             active=row.active,
+            user_id=row.user_id,
         )
