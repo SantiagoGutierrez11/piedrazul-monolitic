@@ -1,4 +1,4 @@
-"""Cambios de estado de una cita ya agendada: cancelación por el paciente y atención por el médico."""
+"""Cambios de estado de una cita ya agendada: cancelación (paciente o personal) y atención por el médico."""
 from app.core.event_bus import publish
 from app.core.exceptions import NotFoundError
 from app.modules.appointment.domain.entities import Appointment, PatientAuthorization, ServiceType
@@ -16,6 +16,23 @@ class CancelPatientAppointment:
         appointment = self._repository.find_by_id(appointment_id)
         # Una cita ajena se reporta como inexistente para no revelar citas de otros pacientes.
         if appointment is None or appointment.patient_id != self._patients.find_id_by_user(user_id):
+            raise NotFoundError("No se encontró la cita")
+
+        appointment.cancel()
+        saved = self._repository.save(appointment)
+        publish("appointment.cancelled", {"appointment_id": saved.appointment_id})
+        return saved
+
+
+class CancelAppointment:
+    """El personal del centro cancela una cita a nombre del paciente."""
+
+    def __init__(self, repository: AppointmentRepository):
+        self._repository = repository
+
+    def execute(self, appointment_id: int) -> Appointment:
+        appointment = self._repository.find_by_id(appointment_id)
+        if appointment is None:
             raise NotFoundError("No se encontró la cita")
 
         appointment.cancel()

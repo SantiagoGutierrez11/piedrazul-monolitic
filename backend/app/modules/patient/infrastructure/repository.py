@@ -1,5 +1,5 @@
 """Acceso a datos del schema `patient`."""
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,9 @@ class PatientRepository:
             select(PatientModel).where(PatientModel.patient_id.in_(patient_ids))
         ).all()
         return [self._to_entity(row) for row in rows]
+
+    def count(self) -> int:
+        return self._db.scalar(select(func.count()).select_from(PatientModel))
 
     def find_by_email(self, email: str) -> Patient | None:
         return self._first(select(PatientModel).where(PatientModel.email == email))

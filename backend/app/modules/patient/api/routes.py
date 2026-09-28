@@ -34,6 +34,11 @@ def register(payload: RegisterPatientRequest, use_case: RegisterPatient = Depend
     )
 
 
+@router.get("/count", dependencies=[Depends(require_role(Role.ADMINISTRADOR))])
+def count_patients(db: Session = Depends(get_db)):
+    return {"total": PatientRepository(db).count()}
+
+
 @router.get("/me", response_model=PatientProfileResponse)
 def get_me(
     user: CurrentUser = Depends(require_role(Role.PACIENTE)),

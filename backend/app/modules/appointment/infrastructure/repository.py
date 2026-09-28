@@ -1,7 +1,7 @@
 """Acceso a datos del schema `appointment`."""
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -26,6 +26,24 @@ class AppointmentRepository:
             .order_by(AppointmentModel.start_time)
         ).all()
         return [self._to_entity(row) for row in rows]
+
+    def find_between(self, date_from: date, date_to: date) -> list[Appointment]:
+        rows = self._db.scalars(
+            select(AppointmentModel)
+            .where(AppointmentModel.date >= date_from, AppointmentModel.date <= date_to)
+            .order_by(AppointmentModel.date, AppointmentModel.start_time)
+        ).all()
+        return [self._to_entity(row) for row in rows]
+
+    def count_active_from(self, from_date: date) -> int:
+        return self._db.scalar(
+            select(func.count())
+            .select_from(AppointmentModel)
+            .where(
+                AppointmentModel.date >= from_date,
+                AppointmentModel.status.in_([status.value for status in ACTIVE_STATUSES]),
+            )
+        )
 
     def find_by_id(self, appointment_id: int) -> Appointment | None:
         row = self._db.get(AppointmentModel, appointment_id)
