@@ -5,9 +5,10 @@
 
   <div class="card filtros">
     <div class="filtro filtro--profesional">
-      <label for="doctorId">Profesional o terapista</label>
+      <label for="doctorId">Profesional o terapista <span class="required">*</span></label>
       <select
         id="doctorId"
+        [class.invalid]="mostrarFaltantes() && !selectedDoctorId()"
         [ngModel]="selectedDoctorId()"
         (ngModelChange)="selectedDoctorId.set($event)"
         name="doctorId"
@@ -22,9 +23,10 @@
     </div>
 
     <div class="filtro">
-      <label for="fecha">Fecha</label>
+      <label for="fecha">Fecha <span class="required">*</span></label>
       <input
         id="fecha"
+        [class.invalid]="mostrarFaltantes() && !selectedDate()"
         type="date"
         [ngModel]="selectedDate()"
         (ngModelChange)="selectedDate.set($event)"
@@ -62,17 +64,41 @@
       </select>
     </div>
 
-    <button type="button" (click)="buscar()" [disabled]="loading()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="7" />
-        <path d="m20 20-3.5-3.5" stroke-linecap="round" />
-      </svg>
-      {{ loading() ? 'Buscando...' : 'Buscar' }}
-    </button>
+    <div class="acciones">
+      <button type="button" (click)="buscar()" [disabled]="loading()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" stroke-linecap="round" />
+        </svg>
+        {{ loading() ? 'Buscando...' : 'Buscar' }}
+      </button>
+
+      <button
+        type="button"
+        class="secondary"
+        (click)="exportarCsv()"
+        [disabled]="exportando()"
+        title="Descarga las citas del profesional en la fecha elegida, para abrir en Excel"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 4v11m0 0-4-4m4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M5 19h14" stroke-linecap="round" />
+        </svg>
+        {{ exportando() ? 'Exportando...' : 'Exportar CSV' }}
+      </button>
+    </div>
+
+    <p class="filtros__nota">
+      <span class="required">*</span> Obligatorios para buscar y para exportar a CSV.
+    </p>
   </div>
 
   @if (error()) {
     <p class="alert error">{{ error() }}</p>
+  }
+
+  @if (avisoExportacion()) {
+    <p class="alert aviso">{{ avisoExportacion() }}</p>
   }
 
   @if (loading()) {
