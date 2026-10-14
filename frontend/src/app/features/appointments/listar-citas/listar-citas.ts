@@ -8,6 +8,13 @@ import { Doctor } from '../../medical-staff/models/doctor.model';
 
 const PAGE_SIZE = 10;
 
+/** Mensajes que ve el usuario al exportar la agenda a CSV. */
+export const MENSAJES_EXPORTACION = {
+  faltanFiltros: 'Selecciona un profesional y una fecha para exportar las citas.',
+  sinCitas: 'No hay citas para exportar del profesional en la fecha seleccionada.',
+  error: 'No se pudo generar el archivo. Intenta de nuevo en unos minutos.',
+} as const;
+
 @Component({
   selector: 'app-listar-citas',
   standalone: true,
@@ -38,6 +45,12 @@ export class ListarCitas implements OnInit {
   readonly error = signal('');
   readonly searched = signal(false);
 
+  // Profesional y fecha son obligatorios para buscar y para exportar.
+  readonly filtrosIncompletos = computed(() => !this.selectedDoctorId() || !this.selectedDate());
+  readonly mostrarFaltantes = signal(false);
+  readonly exportando = signal(false);
+  readonly avisoExportacion = signal('');
+
   readonly page = signal(1);
   readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.appointments().length / PAGE_SIZE)),
@@ -57,11 +70,14 @@ export class ListarCitas implements OnInit {
   buscar(): void {
     const doctorId = this.selectedDoctorId();
     const date = this.selectedDate();
+    this.avisoExportacion.set('');
     if (!doctorId || !date) {
+      this.mostrarFaltantes.set(true);
       this.error.set('Selecciona un profesional y una fecha.');
       return;
     }
 
+    this.mostrarFaltantes.set(false);
     this.loading.set(true);
     this.error.set('');
     this.page.set(1);
@@ -84,6 +100,20 @@ export class ListarCitas implements OnInit {
           this.searched.set(true);
         },
       });
+  }
+
+  /** Exporta a CSV la agenda del profesional en la fecha elegida. */
+  exportarCsv(): void {
+    this.avisoExportacion.set('');
+    if (this.filtrosIncompletos()) {
+      this.mostrarFaltantes.set(true);
+      this.error.set(MENSAJES_EXPORTACION.faltanFiltros);
+      return;
+    }
+
+    this.mostrarFaltantes.set(false);
+    this.error.set('');
+    // La descarga del archivo se conecta con el endpoint del backend (subtarea 3.3).
   }
 
   cambiarPagina(delta: number): void {

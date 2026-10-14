@@ -6,6 +6,24 @@
     flex-wrap: wrap;
     margin-bottom: 1.5rem;
     padding: 1.25rem 1.5rem;
+
+    &__nota {
+      flex-basis: 100%;
+      margin: -0.25rem 0 0;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+  }
+
+  .acciones {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .alert.aviso {
+    color: var(--color-warning);
+    background: var(--color-warning-soft);
+    margin: -0.5rem 0 1.5rem;
   }
 
   .filtro {
