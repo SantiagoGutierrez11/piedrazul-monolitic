@@ -4,7 +4,7 @@ caso de uso de application/ — el router no debe contener lógica de negocio.
 """
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -23,6 +23,8 @@ from app.modules.appointment.application.appointment_status import (
     CancelAppointment,
     CancelPatientAppointment,
 )
+from app.modules.appointment.application import export_csv
+from app.modules.appointment.application.export_csv import ExportAgendaCsv
 from app.modules.appointment.application.list_appointments import ListAppointments
 from app.modules.appointment.application.scheduling.patient_scheduling import (
     SchedulePatientAppointment,
@@ -94,6 +96,32 @@ def list_by_doctor_and_date(
 ):
     listing = use_case.by_doctor_and_date(doctor_id, date, service_type, status)
     return [AppointmentResponse.from_listing(item) for item in listing]
+
+
+@router.get(
+    "/doctor/{doctor_id}/date/{date}/export",
+    response_class=Response,
+    responses={
+        200: {"content": {"text/csv": {}}, "description": "Archivo CSV de la agenda"},
+        204: {"description": "El profesional no tiene citas que exportar en esa fecha"},
+    },
+)
+def export_agenda_csv(
+    doctor_id: int,
+    date: date,
+    user: CurrentUser = Depends(require_role(*export_csv.EXPORT_ROLES)),
+    db: Session = Depends(get_db),
+    use_case: ListAppointments = Depends(get_list_appointments),
+):
+    """Agenda del profesional en la fecha, en CSV para abrir en Excel (sin citas canceladas)."""
+    csv_file = ExportAgendaCsv(use_case, DoctorDirectory(DoctorRepository(db))).execute(user, doctor_id, date)
+    if csv_file is None:
+        return Response(status_code=204)
+    return Response(
+        content=csv_file.content,
+        media_type=export_csv.MEDIA_TYPE,
+        headers={"Content-Disposition": f'attachment; filename="{csv_file.filename}"'},
+    )
 
 
 @router.get(

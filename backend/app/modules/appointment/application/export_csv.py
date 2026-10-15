@@ -8,12 +8,18 @@ import csv
 import io
 import re
 import unicodedata
+from dataclasses import dataclass
 from datetime import date
+from typing import Protocol
 
-from app.core.exceptions import ForbiddenError
+from app.core.exceptions import ForbiddenError, NotFoundError
 from app.core.security import CurrentUser, Role
-from app.modules.appointment.application.list_appointments import AppointmentWithPatient
+from app.modules.appointment.application.list_appointments import (
+    AppointmentWithPatient,
+    ListAppointments,
+)
 from app.modules.appointment.domain.entities import AppointmentStatus
+from app.modules.medical_staff.application.directory import DoctorSummary
 
 # ---------------------------------------------------------------- Columnas (2.1)
 
@@ -92,3 +98,40 @@ def _safe_cell(value: str) -> str:
     if value.startswith(_FORMULA_PREFIXES) and not _PHONE.fullmatch(value):
         return f"'{value}"
     return value
+
+
+# ---------------------------------------------------------------- Caso de uso (3.1)
+
+
+class DoctorLookup(Protocol):
+    """Contrato que el módulo `medical_staff` expone para resolver al profesional."""
+
+    def find(self, doctor_id: int) -> DoctorSummary | None: ...
+
+    def find_id_by_user(self, user_id: str) -> int | None: ...
+
+
+@dataclass(frozen=True)
+class CsvFile:
+    filename: str
+    content: bytes
+
+
+class ExportAgendaCsv:
+    def __init__(self, appointments: ListAppointments, doctors: DoctorLookup):
+        self._appointments = appointments
+        self._doctors = doctors
+
+    def execute(self, user: CurrentUser, doctor_id: int, on_date: date) -> CsvFile | None:
+        """Archivo con la agenda, o `None` si el profesional no tiene citas que exportar ese día."""
+        own_doctor_id = self._doctors.find_id_by_user(user.user_id) if Role.MEDICO in user.roles else None
+        ensure_can_export(user, doctor_id, own_doctor_id)
+
+        doctor = self._doctors.find(doctor_id)
+        if doctor is None:
+            raise NotFoundError("El profesional no existe")
+
+        listing = exportable(self._appointments.by_doctor_and_date(doctor_id, on_date))
+        if not listing:
+            return None
+        return CsvFile(filename=filename(doctor.full_name, on_date), content=to_csv(listing))
