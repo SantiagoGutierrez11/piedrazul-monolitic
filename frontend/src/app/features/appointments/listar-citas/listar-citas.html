@@ -101,6 +101,12 @@
     <p class="alert aviso">{{ avisoExportacion() }}</p>
   }
 
+  
+
+  @if (exportacionExitosa()) {
+    <p class="alert ok">{{ exportacionExitosa() }}</p>
+  }
+
   @if (loading()) {
     <div class="card empty-state">Cargando citas...</div>
   } @else if (searched() && appointments().length === 0) {
