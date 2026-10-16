@@ -34,6 +34,14 @@ export class AppointmentService {
     });
   }
 
+  /** Agenda del profesional en CSV. Responde 204 (sin cuerpo) si no hay citas que exportar. */
+  exportCsv(doctorId: number, date: string) {
+    return this.http.get(`${this.baseUrl}/doctor/${doctorId}/date/${date}/export`, {
+      observe: 'response',
+      responseType: 'blob',
+    });
+  }
+
   // ---- Personal del centro (paneles)
 
   listByDate(date: string, doctorId: number | null = null) {

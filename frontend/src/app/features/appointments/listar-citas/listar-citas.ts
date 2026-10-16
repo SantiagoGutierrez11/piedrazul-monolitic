@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../services/appointment.service';
@@ -12,8 +13,24 @@ const PAGE_SIZE = 10;
 export const MENSAJES_EXPORTACION = {
   faltanFiltros: 'Selecciona un profesional y una fecha para exportar las citas.',
   sinCitas: 'No hay citas para exportar del profesional en la fecha seleccionada.',
+  sinPermiso: 'Solo puedes exportar tu propia agenda.',
   error: 'No se pudo generar el archivo. Intenta de nuevo en unos minutos.',
+  descargado: (archivo: string) => `Se descargó el archivo ${archivo}.`,
 } as const;
+
+/** Nombre que el backend le da al archivo en la cabecera Content-Disposition. */
+function nombreDelArchivo(contentDisposition: string | null, fecha: string): string {
+  return /filename="([^"]+)"/.exec(contentDisposition ?? '')?.[1] ?? `citas_${fecha}.csv`;
+}
+
+function descargar(archivo: Blob, nombre: string): void {
+  const url = URL.createObjectURL(archivo);
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = nombre;
+  enlace.click();
+  URL.revokeObjectURL(url);
+}
 
 @Component({
   selector: 'app-listar-citas',
@@ -45,11 +62,10 @@ export class ListarCitas implements OnInit {
   readonly error = signal('');
   readonly searched = signal(false);
 
-  // Profesional y fecha son obligatorios para buscar y para exportar.
-  readonly filtrosIncompletos = computed(() => !this.selectedDoctorId() || !this.selectedDate());
   readonly mostrarFaltantes = signal(false);
   readonly exportando = signal(false);
   readonly avisoExportacion = signal('');
+  readonly exportacionExitosa = signal('');
 
   readonly page = signal(1);
   readonly totalPages = computed(() =>
@@ -71,6 +87,7 @@ export class ListarCitas implements OnInit {
     const doctorId = this.selectedDoctorId();
     const date = this.selectedDate();
     this.avisoExportacion.set('');
+    this.exportacionExitosa.set('');
     if (!doctorId || !date) {
       this.mostrarFaltantes.set(true);
       this.error.set('Selecciona un profesional y una fecha.');
@@ -104,8 +121,11 @@ export class ListarCitas implements OnInit {
 
   /** Exporta a CSV la agenda del profesional en la fecha elegida. */
   exportarCsv(): void {
+    const doctorId = this.selectedDoctorId();
+    const date = this.selectedDate();
     this.avisoExportacion.set('');
-    if (this.filtrosIncompletos()) {
+    this.exportacionExitosa.set('');
+    if (!doctorId || !date) {
       this.mostrarFaltantes.set(true);
       this.error.set(MENSAJES_EXPORTACION.faltanFiltros);
       return;
@@ -113,7 +133,30 @@ export class ListarCitas implements OnInit {
 
     this.mostrarFaltantes.set(false);
     this.error.set('');
-    // La descarga del archivo se conecta con el endpoint del backend (subtarea 3.3).
+    this.exportando.set(true);
+
+    
+
+
+
+    this.appointmentService.exportCsv(doctorId, date).subscribe({
+      next: (response) => {
+        this.exportando.set(false);
+        if (response.status === 204 || !response.body) {
+          this.avisoExportacion.set(MENSAJES_EXPORTACION.sinCitas);
+          return;
+        }
+        const nombre = nombreDelArchivo(response.headers.get('Content-Disposition'), date);
+        descargar(response.body, nombre);
+        this.exportacionExitosa.set(MENSAJES_EXPORTACION.descargado(nombre));
+      },
+      error: (error: HttpErrorResponse) => {
+        this.exportando.set(false);
+        this.error.set(
+          error.status === 403 ? MENSAJES_EXPORTACION.sinPermiso : MENSAJES_EXPORTACION.error,
+        );
+      },
+    });
   }
 
   cambiarPagina(delta: number): void {

@@ -23,6 +23,11 @@
   .alert.aviso {
     color: var(--color-warning);
     background: var(--color-warning-soft);
+  }
+
+  
+  .alert.aviso,
+  .alert.ok {
     margin: -0.5rem 0 1.5rem;
   }
 
