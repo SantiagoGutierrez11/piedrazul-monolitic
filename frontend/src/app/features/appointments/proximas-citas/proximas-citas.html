@@ -1,0 +1,129 @@
+<header class="panel-header">
+  <div>
+    <h1>Próximas citas</h1>
+    <p class="subtitle">{{ periodo() || 'Citas agendadas desde hoy, semana por semana' }}</p>
+  </div>
+</header>
+
+<section class="stats">
+  <div class="card stat">
+    <small>Próximas citas</small>
+    <strong>{{ reporte()?.total ?? '—' }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Esta semana</small>
+    <strong class="ok">{{ reporte() ? estaSemana() : '—' }}</strong>
+  </div>
+  <div class="card stat">
+    <small>Semana con más citas</small>
+    @if (semanaPico(); as pico) {
+      <strong class="warn">{{ pico.total }}</strong>
+      <span class="stat__detalle">{{ pico.rango }}</span>
+    } @else {
+      <strong>—</strong>
+    }
+  </div>
+</section>
+
+<div class="filtros">
+  @if (verTodoElCentro) {
+    <label>
+      Profesional
+      <select [ngModel]="medicoId() ?? ''" (ngModelChange)="cambiarMedico($event)">
+        <option value="">Todos los profesionales</option>
+        @for (medico of medicos(); track medico.doctorId) {
+          <option [value]="medico.doctorId">{{ medico.fullName }} · {{ medico.specialty }}</option>
+        }
+      </select>
+    </label>
+  }
+  <label>
+    Periodo
+    <select [ngModel]="semanas()" (ngModelChange)="cambiarSemanas($event)">
+      @for (opcion of opcionesSemanas; track opcion) {
+        <option [ngValue]="opcion">Próximas {{ opcion }} semanas</option>
+      }
+    </select>
+  </label>
+</div>
+
+@if (error()) {
+  <p class="alert error" role="alert">{{ error() }}</p>
+}
+
+@if (reporte() === null) {
+  <section class="card bloque"><p class="vacio">Cargando las próximas citas...</p></section>
+} @else if (vista().length > 0) {
+  <section class="card bloque">
+    <h2 class="bloque__titulo">Citas por semana</h2>
+    <ul class="semanas">
+      @for (semana of vista(); track semana.inicio) {
+        <li>
+          <button type="button" class="semana" (click)="irASemana(semana.inicio)">
+            <span class="semana__texto">
+              <strong>{{ semana.etiqueta }}</strong>
+              <small>{{ semana.rango }}</small>
+            </span>
+            <span class="semana__pista">
+              <span class="semana__barra" [style.width.%]="semana.ancho"></span>
+            </span>
+            <span class="semana__total">{{ semana.total }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+
+  @for (semana of vista(); track semana.inicio) {
+    <section class="card bloque detalle" [id]="'semana-' + semana.inicio">
+      <h2 class="bloque__titulo">
+        <span>{{ semana.etiqueta }} <small>· {{ semana.rango }}</small></span>
+        <span class="contador">{{ semana.total }} {{ semana.total === 1 ? 'cita' : 'citas' }}</span>
+      </h2>
+
+      @if (semana.total === 0) {
+        <p class="vacio">No hay citas agendadas esta semana.</p>
+      } @else {
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Paciente</th>
+                <th>Teléfono</th>
+                @if (verTodoElCentro) {
+                  <th>Profesional</th>
+                }
+                <th>Tipo</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            @for (dia of semana.dias; track dia.fecha) {
+              <tbody>
+                <tr class="dia">
+                  <th [attr.colspan]="verTodoElCentro ? 6 : 5">{{ dia.titulo }}</th>
+                </tr>
+                @for (cita of dia.citas; track cita.appointmentId) {
+                  <tr>
+                    <td class="hora">{{ horaAmPm(cita.startTime) }}</td>
+                    <td>{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</td>
+                    <td>{{ cita.patientPhone ?? '—' }}</td>
+                    @if (verTodoElCentro) {
+                      <td>{{ cita.doctorName }}</td>
+                    }
+                    <td>{{ servicios[cita.serviceType] }}</td>
+                    <td>
+                      <span class="badge badge--{{ cita.status.toLowerCase() }}">{{
+                        estados[cita.status]
+                      }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            }
+          </table>
+        </div>
+      }
+    </section>
+  }
+}

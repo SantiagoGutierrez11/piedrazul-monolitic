@@ -48,6 +48,14 @@ class ListAppointments:
         ]
         return self._with_patients(appointments)
 
+    
+    
+    def active_between(
+            self, date_from: date, date_to: date, doctor_id: int | None = None
+        ) -> list[AppointmentWithPatient]:
+            """Citas agendadas o reagendadas en el rango, de todos los profesionales o de uno."""
+            return self._with_patients(self._repository.find_active_between(date_from, date_to, doctor_id))
+
     def by_patient(self, patient_id: int) -> list[AppointmentWithPatient]:
         return self._with_patients(self._repository.find_by_patient(patient_id))
 
