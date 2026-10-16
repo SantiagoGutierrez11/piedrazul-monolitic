@@ -342,6 +342,11 @@ table {
   .subtitle {
     margin: 0;
   }
+  &__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
 }
 
 .stats {

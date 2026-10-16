@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { forkJoin, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { mensajeDeError } from '../../../shared/error-messages';
@@ -18,6 +19,7 @@ const ACTIVAS = ['AGENDADA', 'REAGENDADA'];
 // Panel del médico: resumen del día, próxima cita y agenda por franjas.
 @Component({
   selector: 'app-panel-medico',
+  imports: [RouterLink],
   templateUrl: './panel-medico.html',
   styleUrl: './panel-medico.scss',
 })
