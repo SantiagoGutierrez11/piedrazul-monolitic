@@ -6,6 +6,7 @@ from pydantic import Field
 from app.modules.appointment.application.list_appointments import AppointmentWithPatient
 from app.modules.appointment.application.scheduling.patient_scheduling import PatientBooking
 from app.modules.appointment.application.scheduling_options import SchedulingOptions
+from app.modules.appointment.application.upcoming import UpcomingAppointments
 from app.modules.appointment.domain.entities import Appointment, AppointmentStatus, ServiceType
 from app.shared.schemas import CamelModel
 
@@ -59,6 +60,42 @@ class SummaryResponse(CamelModel):
     today: int
     pending: int
     week: list[DayCountResponse]
+
+
+
+
+
+
+class UpcomingWeekResponse(CamelModel):
+    start: date
+    end: date
+    total: int
+    appointments: list[AppointmentResponse]
+
+
+class UpcomingResponse(CamelModel):
+    date_from: date
+    date_to: date
+    total: int
+    weeks: list[UpcomingWeekResponse]
+
+    @classmethod
+    def from_result(cls, result: UpcomingAppointments) -> "UpcomingResponse":
+        weeks = [
+            UpcomingWeekResponse(
+                start=week.start,
+                end=week.end,
+                total=len(week.appointments),
+                appointments=[AppointmentResponse.from_listing(item) for item in week.appointments],
+            )
+            for week in result.weeks
+        ]
+        return cls(
+            date_from=result.date_from,
+            date_to=result.date_to,
+            total=sum(week.total for week in weeks),
+            weeks=weeks,
+        )
 
 
 class PatientBookingRequest(CamelModel):

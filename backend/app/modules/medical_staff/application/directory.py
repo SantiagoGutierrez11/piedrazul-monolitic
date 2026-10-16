@@ -31,3 +31,8 @@ class DoctorDirectory:
             specialty=doctor.specialty,
             active=doctor.active,
         )
+
+    def find_id_by_user(self, user_id: str) -> int | None:
+        """Profesional asociado a una cuenta de acceso (identificador de Keycloak)."""
+        doctor = self._repository.find_by_user_id(user_id)
+        return doctor.doctor_id if doctor else None

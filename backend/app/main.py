@@ -29,6 +29,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # El frontend lee de aquí el nombre del archivo CSV exportado.
+
+    expose_headers=["Content-Disposition"],
 )
 
 app.include_router(appointment_router, prefix="/api/v1/appointments", tags=["Appointments"])

@@ -8,6 +8,7 @@ import {
   PatientBookingRequest,
   SchedulingOptions,
   ServiceType,
+  UpcomingAppointments,
 } from '../models/appointment.model';
 
 // Compartido por el listado de citas, el agendamiento y las pantallas del paciente.
@@ -34,6 +35,14 @@ export class AppointmentService {
     });
   }
 
+  /** Agenda del profesional en CSV. Responde 204 (sin cuerpo) si no hay citas que exportar. */
+  exportCsv(doctorId: number, date: string) {
+    return this.http.get(`${this.baseUrl}/doctor/${doctorId}/date/${date}/export`, {
+      observe: 'response',
+      responseType: 'blob',
+    });
+  }
+
   // ---- Personal del centro (paneles)
 
   listByDate(date: string, doctorId: number | null = null) {
@@ -43,6 +52,15 @@ export class AppointmentService {
 
   summary() {
     return this.http.get<AppointmentSummary>(`${this.baseUrl}/summary`);
+  }
+
+  /** Próximas citas por semana. El médico recibe solo las suyas, sin importar `doctorId`. */
+  upcoming(weeks: number, doctorId: number | null = null) {
+    let params = new HttpParams().set('weeks', weeks);
+    if (doctorId) {
+      params = params.set('doctor_id', doctorId);
+    }
+    return this.http.get<UpcomingAppointments>(`${this.baseUrl}/upcoming`, { params });
   }
 
   cancel(appointmentId: number) {

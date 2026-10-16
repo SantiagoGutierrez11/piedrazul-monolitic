@@ -32,6 +32,7 @@ describe('Shell', () => {
     const nav = renderFor(['administrador']).querySelector('nav')!.textContent!;
 
     expect(nav).toContain('Panel de Citas');
+    expect(nav).toContain('Próximas Citas');
     expect(nav).toContain('Listar Citas');
     expect(nav).toContain('Configuración');
     expect(nav).not.toContain('Agendar Cita');
@@ -44,6 +45,7 @@ describe('Shell', () => {
     expect(nav).toContain('Agendar Cita');
     expect(nav).toContain('Mis Citas');
     expect(nav).not.toContain('Listar Citas');
+    expect(nav).not.toContain('Próximas Citas');
     expect(nav).not.toContain('Configuración');
   });
 
@@ -53,6 +55,7 @@ describe('Shell', () => {
     expect(nav).toContain('Mi consulta');
     expect(nav).toContain('Panel de Citas');
     expect(nav).toContain('Mi agenda');
+    expect(nav).toContain('Próximas Citas');  
     expect(nav).not.toContain('Configuración');
   });
 

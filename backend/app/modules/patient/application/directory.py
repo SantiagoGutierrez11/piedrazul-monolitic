@@ -6,6 +6,7 @@ directamente las tablas del schema `patient`.
 """
 from dataclasses import dataclass
 
+from app.modules.patient.domain.entities import Patient
 from app.modules.patient.infrastructure.repository import PatientRepository
 
 
@@ -14,6 +15,16 @@ class PatientSummary:
     patient_id: int
     full_name: str
     phone: str
+    # Tipo y número de documento juntos, por ejemplo "CC 1061234567"; vacío si no lo registró.
+    document: str = ""
+
+
+def _document_of(patient: Patient) -> str:
+    if not patient.document_number:
+        return ""
+    if patient.document_type is None:
+        return patient.document_number
+    return f"{patient.document_type.value} {patient.document_number}"
 
 
 class PatientDirectory:
@@ -26,6 +37,7 @@ class PatientDirectory:
                 patient_id=patient.patient_id,
                 full_name=patient.full_name,
                 phone=patient.phone,
+                document=_document_of(patient),
             )
             for patient in self._repository.find_by_ids(patient_ids)
         }

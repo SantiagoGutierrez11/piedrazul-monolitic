@@ -3,7 +3,10 @@
     <h1>Resumen General</h1>
     <p class="subtitle">{{ hoy }}</p>
   </div>
-  <a class="boton" routerLink="/configuration">Configuración del sistema</a>
+  <div class="panel-header__acciones">
+    <a class="boton" routerLink="/appointments/proximas">Ver próximas citas</a>
+    <a class="boton secondary" routerLink="/configuration">Configuración del sistema</a>
+  </div>
 </header>
 
 @if (error()) {
