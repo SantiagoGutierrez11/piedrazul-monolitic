@@ -69,6 +69,23 @@ class AppointmentRepository:
         ).all()
         return [self._to_entity(row) for row in rows]
 
+    
+    
+    
+    
+    def find_active_between(
+            self, date_from: date, date_to: date, doctor_id: int | None = None
+        ) -> list[Appointment]:
+            query = select(AppointmentModel).where(
+                AppointmentModel.date >= date_from,
+                AppointmentModel.date <= date_to,
+                AppointmentModel.status.in_([status.value for status in ACTIVE_STATUSES]),
+            )
+            if doctor_id is not None:
+                query = query.where(AppointmentModel.doctor_id == doctor_id)
+            rows = self._db.scalars(query.order_by(AppointmentModel.date, AppointmentModel.start_time)).all()
+            return [self._to_entity(row) for row in rows]
+
     def find_by_doctor_between(self, doctor_id: int, date_from: date, date_to: date) -> list[Appointment]:
         rows = self._db.scalars(
             select(AppointmentModel).where(

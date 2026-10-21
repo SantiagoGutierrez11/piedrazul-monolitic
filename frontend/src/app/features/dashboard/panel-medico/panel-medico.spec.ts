@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { API_BASE_URL } from '../../../core/api-config';
 import { hoyIso } from '../../../shared/fechas';
 import { Appointment } from '../../appointments/models/appointment.model';
@@ -27,7 +28,7 @@ describe('PanelMedico', () => {
   it('summarizes the day and lists free slots of the doctor schedule', () => {
     TestBed.configureTestingModule({
       imports: [PanelMedico],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
     const fixture = TestBed.createComponent(PanelMedico);
     const http = TestBed.inject(HttpTestingController);

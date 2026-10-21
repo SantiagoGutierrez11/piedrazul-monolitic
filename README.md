@@ -36,7 +36,7 @@ docker compose up --build
 | Frontend (Angular + nginx) | http://localhost:4200 |
 | Backend (FastAPI) | http://localhost:8000 · docs en `/docs` |
 | Keycloak | http://localhost:8080 · consola de administración con `admin` / `admin` |
-| PostgreSQL | localhost:5432 (usuario/clave `postgres`) |
+| PostgreSQL | localhost:5433 (usuario/clave `postgres`) |
 
 Keycloak tarda unos 30 segundos en quedar listo la primera vez: importa el realm
 `piedrazul` desde `keycloak/realm-piedrazul.json`, con los cuatro roles (`paciente`,
