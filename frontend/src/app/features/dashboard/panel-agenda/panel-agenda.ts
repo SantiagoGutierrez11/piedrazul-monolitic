@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { mensajeDeError } from '../../../shared/error-messages';
 import { fechaCompleta, horaAmPm, hoyIso } from '../../../shared/fechas';
@@ -17,7 +18,7 @@ const ACTIVAS = ['AGENDADA', 'REAGENDADA'];
 // Panel del agendador: agenda del día de todos los profesionales, con filtros y cancelación.
 @Component({
   selector: 'app-panel-agenda',
-  imports: [FormsModule, ConfirmDialog],
+  imports: [FormsModule, RouterLink, ConfirmDialog],
   templateUrl: './panel-agenda.html',
   styleUrl: './panel-agenda.scss',
 })

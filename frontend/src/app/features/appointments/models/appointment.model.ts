@@ -40,6 +40,21 @@ export interface AppointmentSummary {
   week: { date: string; count: number }[];
 }
 
+// GET /appointments/upcoming: próximas citas (desde hoy) agrupadas por semana de lunes a domingo.
+export interface UpcomingWeek {
+  start: string;
+  end: string;
+  total: number;
+  appointments: Appointment[];
+}
+
+export interface UpcomingAppointments {
+  dateFrom: string;
+  dateTo: string;
+  total: number;
+  weeks: UpcomingWeek[];
+}
+
 // Cuerpo de POST /appointments/autonomous: el paciente sale del token, no se envía.
 export interface PatientBookingRequest {
   doctorId: number;

@@ -4,7 +4,7 @@ caso de uso de application/ — el router no debe contener lógica de negocio.
 """
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -17,18 +17,23 @@ from app.modules.appointment.api.schemas import (
     PatientBookingRequest,
     SchedulingOptionsResponse,
     SummaryResponse,
+    UpcomingResponse,
 )
 from app.modules.appointment.application.appointment_status import (
     AttendAppointment,
     CancelAppointment,
     CancelPatientAppointment,
 )
+from app.modules.appointment.application import export_csv
+from app.modules.appointment.application.export_csv import ExportAgendaCsv
 from app.modules.appointment.application.list_appointments import ListAppointments
 from app.modules.appointment.application.scheduling.patient_scheduling import (
     SchedulePatientAppointment,
 )
 from app.modules.appointment.application.scheduling_options import SchedulingOptionsQuery
 from app.modules.appointment.application.summary import AppointmentSummaryQuery
+from app.modules.appointment.application import upcoming as upcoming_query
+from app.modules.appointment.application.upcoming import UpcomingAppointmentsQuery
 from app.modules.appointment.domain.entities import AppointmentStatus, ServiceType
 from app.modules.appointment.infrastructure.authorization_repository import AuthorizationRepository
 from app.modules.appointment.infrastructure.repository import AppointmentRepository
@@ -97,6 +102,32 @@ def list_by_doctor_and_date(
 
 
 @router.get(
+    "/doctor/{doctor_id}/date/{date}/export",
+    response_class=Response,
+    responses={
+        200: {"content": {"text/csv": {}}, "description": "Archivo CSV de la agenda"},
+        204: {"description": "El profesional no tiene citas que exportar en esa fecha"},
+    },
+)
+def export_agenda_csv(
+    doctor_id: int,
+    date: date,
+    user: CurrentUser = Depends(require_role(*export_csv.EXPORT_ROLES)),
+    db: Session = Depends(get_db),
+    use_case: ListAppointments = Depends(get_list_appointments),
+):
+    """Agenda del profesional en la fecha, en CSV para abrir en Excel (sin citas canceladas)."""
+    csv_file = ExportAgendaCsv(use_case, DoctorDirectory(DoctorRepository(db))).execute(user, doctor_id, date)
+    if csv_file is None:
+        return Response(status_code=204)
+    return Response(
+        content=csv_file.content,
+        media_type=export_csv.MEDIA_TYPE,
+        headers={"Content-Disposition": f'attachment; filename="{csv_file.filename}"'},
+    )
+
+
+@router.get(
     "/patient/{patient_id}",
     response_model=list[AppointmentResponse],
     dependencies=[Depends(require_role(*STAFF))],
@@ -131,6 +162,22 @@ def summary(db: Session = Depends(get_db), clock: Clock = Depends(get_clock)):
         pending=result.pending,
         week=[DayCountResponse(date=day.date, count=day.count) for day in result.week],
     )
+
+
+
+
+@router.get("/upcoming", response_model=UpcomingResponse)
+def upcoming(
+    weeks: int = Query(upcoming_query.DEFAULT_WEEKS, ge=1, le=upcoming_query.MAX_WEEKS),
+    doctor_id: int | None = None,
+    user: CurrentUser = Depends(require_role(*upcoming_query.UPCOMING_ROLES)),
+    db: Session = Depends(get_db),
+    clock: Clock = Depends(get_clock),
+    use_case: ListAppointments = Depends(get_list_appointments),
+):
+    """Próximas citas (desde hoy) agrupadas por semana; el médico solo ve las suyas."""
+    query = UpcomingAppointmentsQuery(use_case, DoctorDirectory(DoctorRepository(db)), clock)
+    return UpcomingResponse.from_result(query.execute(user, weeks, doctor_id))
 
 
 @router.patch(
