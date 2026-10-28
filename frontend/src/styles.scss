@@ -327,6 +327,12 @@ table {
 
 /* ---------- Paneles del personal (médico, agendador, administrador) ---------- */
 
+/* Cédula del paciente en las tablas y listas del personal. */
+.cedula {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .panel-header {
   display: flex;
   flex-wrap: wrap;

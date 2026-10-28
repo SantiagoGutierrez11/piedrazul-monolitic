@@ -5,6 +5,8 @@ from app.core.security import Role
 from app.modules.appointment.domain.entities import AppointmentStatus
 from app.modules.medical_staff.domain.entities import Doctor
 from app.modules.medical_staff.infrastructure.repository import DoctorRepository
+from app.modules.patient.domain.entities import DocumentType
+from app.modules.patient.infrastructure.repository import PatientRepository
 from tests.scheduling_helpers import CARLOS_ID, GENERAL, MARIA_ID, PHYSIO, book, create_clinic
 
 MONDAY, TUESDAY = date(2026, 3, 9), date(2026, 3, 10)
@@ -76,3 +78,18 @@ def test_admin_counts_registered_patients(client, db_session, login_as):
     login_as(Role.ADMINISTRADOR)
 
     assert client.get("/api/v1/patients/count").json() == {"total": 2}
+
+
+def test_staff_see_the_patient_id_number_with_each_appointment(client, db_session, clock, login_as):
+    create_clinic(db_session)
+    patients = PatientRepository(db_session)
+    maria = patients.find_by_ids({MARIA_ID})[0]
+    maria.document_type, maria.document_number = DocumentType.CC, "1061234567"
+    patients.save(maria)
+    book(db_session, MARIA_ID, GENERAL, MONDAY, time(8, 0))
+    book(db_session, CARLOS_ID, GENERAL, MONDAY, time(9, 0))
+    login_as(Role.MEDICO)
+
+    body = client.get("/api/v1/appointments/date/2026-03-09").json()
+
+    assert [item["patientDocument"] for item in body] == ["CC 1061234567", None]
