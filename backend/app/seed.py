@@ -70,6 +70,9 @@ PATIENTS = [
     Patient(patient_id=8, first_name="Andrés", last_name="Gómez", phone="+57 305 666 7788", **_cc("94512345")),
     Patient(patient_id=9, first_name="Valentina", last_name="Castro", phone="+57 317 999 0011", **_cc("1065678901")),
     Patient(patient_id=10, first_name="Diego", last_name="Herrera", phone="+57 316 333 2211", **_cc("10234567")),
+    # Registrada sin citas, para ver "Sin citas registradas" en el historial (E7-HU1, caso 4.3).
+    # Id alto para no pisar a los pacientes que ya se hayan registrado desde la aplicación.
+    Patient(patient_id=100, first_name="Camila", last_name="Rojas", phone="+57 314 888 9900", **_cc("1066789012")),
 ]
 
 SERVICES = [
