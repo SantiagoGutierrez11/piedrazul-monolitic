@@ -21,7 +21,7 @@ from app.modules.configuration.domain.entities import DoctorScheduleConfiguratio
 from app.modules.configuration.infrastructure.repository import ConfigurationRepository
 from app.modules.medical_staff.domain.entities import Doctor
 from app.modules.medical_staff.infrastructure.repository import DoctorRepository
-from app.modules.patient.domain.entities import Patient
+from app.modules.patient.domain.entities import DocumentType, Patient
 from app.modules.patient.infrastructure.repository import PatientRepository
 from app.shared.clock import SystemClock
 from app.shared.holidays import ColombianHolidays
@@ -44,6 +44,12 @@ DOCTORS = [
 DEMO_PATIENT_USER_ID = "d2f6b958-6c4e-4a17-b3d9-8a1c5e7f2b04"
 DEMO_PATIENT_ID = 1
 
+
+def _cc(number: str) -> dict:
+    """Cédula de ciudadanía, para buscar al paciente en su historial de citas (E7-HU1)."""
+    return {"document_type": DocumentType.CC, "document_number": number}
+
+
 PATIENTS = [
     Patient(
         patient_id=1,
@@ -53,16 +59,17 @@ PATIENTS = [
         phone="+57 300 123 4567",
         email="paciente@piedrazul.com",
         user_id=DEMO_PATIENT_USER_ID,
+        **_cc("1061234567"),
     ),
-    Patient(patient_id=2, first_name="Carlos", last_name="Rodríguez", phone="+57 310 987 6543"),
-    Patient(patient_id=3, first_name="Laura", last_name="Sánchez", phone="+57 320 456 7890"),
-    Patient(patient_id=4, first_name="Roberto", last_name="Díaz", phone="+57 301 222 3344"),
-    Patient(patient_id=5, first_name="Ana", last_name="Martínez", phone="+57 315 555 1122"),
-    Patient(patient_id=6, first_name="Jorge", last_name="Ramírez", phone="+57 312 777 8899"),
-    Patient(patient_id=7, first_name="Sofía", last_name="Torres", phone="+57 318 444 5566"),
-    Patient(patient_id=8, first_name="Andrés", last_name="Gómez", phone="+57 305 666 7788"),
-    Patient(patient_id=9, first_name="Valentina", last_name="Castro", phone="+57 317 999 0011"),
-    Patient(patient_id=10, first_name="Diego", last_name="Herrera", phone="+57 316 333 2211"),
+    Patient(patient_id=2, first_name="Carlos", last_name="Rodríguez", phone="+57 310 987 6543", **_cc("1061234890")),
+    Patient(patient_id=3, first_name="Laura", last_name="Sánchez", phone="+57 320 456 7890", **_cc("1062345678")),
+    Patient(patient_id=4, first_name="Roberto", last_name="Díaz", phone="+57 301 222 3344", **_cc("1059876543")),
+    Patient(patient_id=5, first_name="Ana", last_name="Martínez", phone="+57 315 555 1122", **_cc("1063456789")),
+    Patient(patient_id=6, first_name="Jorge", last_name="Ramírez", phone="+57 312 777 8899", **_cc("76321456")),
+    Patient(patient_id=7, first_name="Sofía", last_name="Torres", phone="+57 318 444 5566", **_cc("1064567890")),
+    Patient(patient_id=8, first_name="Andrés", last_name="Gómez", phone="+57 305 666 7788", **_cc("94512345")),
+    Patient(patient_id=9, first_name="Valentina", last_name="Castro", phone="+57 317 999 0011", **_cc("1065678901")),
+    Patient(patient_id=10, first_name="Diego", last_name="Herrera", phone="+57 316 333 2211", **_cc("10234567")),
 ]
 
 SERVICES = [

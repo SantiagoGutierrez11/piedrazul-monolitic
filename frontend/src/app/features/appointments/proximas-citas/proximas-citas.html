@@ -90,6 +90,7 @@
               <tr>
                 <th>Hora</th>
                 <th>Paciente</th>
+                <th>Cédula</th>
                 <th>Teléfono</th>
                 @if (verTodoElCentro) {
                   <th>Profesional</th>
@@ -101,12 +102,13 @@
             @for (dia of semana.dias; track dia.fecha) {
               <tbody>
                 <tr class="dia">
-                  <th [attr.colspan]="verTodoElCentro ? 6 : 5">{{ dia.titulo }}</th>
+                  <th [attr.colspan]="verTodoElCentro ? 7 : 6">{{ dia.titulo }}</th>
                 </tr>
                 @for (cita of dia.citas; track cita.appointmentId) {
                   <tr>
                     <td class="hora">{{ horaAmPm(cita.startTime) }}</td>
                     <td>{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</td>
+                    <td class="cedula">{{ cita.patientDocument ?? '—' }}</td>
                     <td>{{ cita.patientPhone ?? '—' }}</td>
                     @if (verTodoElCentro) {
                       <td>{{ cita.doctorName }}</td>
