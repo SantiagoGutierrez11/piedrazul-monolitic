@@ -56,7 +56,7 @@
         </a>
       }
 
-      @if (can('medico', 'agendador')) {
+      @if (can('medico', 'agendador', 'administrador')) {
         <a class="nav-item" routerLink="/appointments/historial" routerLinkActive="active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <circle cx="10" cy="10" r="6" />

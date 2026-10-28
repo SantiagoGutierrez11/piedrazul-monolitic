@@ -6,10 +6,15 @@ import {
   PACIENTES_DE_MUESTRA,
   PacienteEncontrado,
 } from './historial-paciente.muestra';
-
-// Valores provisionales del diseño; las reglas definitivas se fijan en la subtarea 2.1.
-const MIN_DIGITOS_SUGERENCIAS = 3;
-const MAX_SUGERENCIAS = 8;
+import {
+  COLUMNAS_HISTORIAL,
+  MAX_SUGERENCIAS,
+  MIN_DIGITOS_SUGERENCIAS,
+  errorDeFormato,
+  errorParaBuscar,
+  masRecientePrimero,
+  sugerirDesde,
+} from './historial-paciente.reglas';
 
 /** Mensajes de estado vacío de la pantalla (subtarea 1.4). */
 export const MENSAJES_HISTORIAL = {
@@ -34,7 +39,8 @@ export function resaltar(documento: string, escrito: string): { coincide: string
     : { coincide: '', resto: documento };
 }
 
-// Historial de citas de un paciente buscado por cédula (E7-HU1), para el médico y el agendador.
+// Historial de citas de un paciente buscado por cédula (E7-HU1), para el médico, el agendador
+// y el administrador.
 @Component({
   selector: 'app-historial-paciente',
   templateUrl: './historial-paciente.html',
@@ -47,6 +53,7 @@ export class HistorialPaciente {
   readonly estados = STATUS_LABELS;
   readonly mensajes = MENSAJES_HISTORIAL;
   readonly minDigitos = MIN_DIGITOS_SUGERENCIAS;
+  readonly columnas = COLUMNAS_HISTORIAL;
   readonly resaltar = resaltar;
 
   readonly cedula = signal('');
@@ -54,10 +61,11 @@ export class HistorialPaciente {
   readonly activa = signal(-1); // sugerencia marcada con el teclado
   readonly paciente = signal<PacienteEncontrado | null>(null);
   readonly noEncontrada = signal(''); // cédula buscada sin resultado
+  readonly errorCedula = signal<string | null>(null); // formato inválido (subtarea 2.1)
 
   readonly sugerencias = computed(() => {
     const escrito = this.cedula();
-    if (escrito.length < MIN_DIGITOS_SUGERENCIAS) {
+    if (!sugerirDesde(escrito)) {
       return [];
     }
     return PACIENTES_DE_MUESTRA.filter((p) => p.documentNumber.startsWith(escrito)).slice(
@@ -66,23 +74,20 @@ export class HistorialPaciente {
     );
   });
 
-  readonly mostrarLista = computed(
-    () => this.listaAbierta() && this.cedula().length >= MIN_DIGITOS_SUGERENCIAS,
-  );
+  readonly mostrarLista = computed(() => this.listaAbierta() && sugerirDesde(this.cedula()));
 
-  // Más reciente primero (la regla definitiva se fija en la subtarea 2.2).
   readonly citas = computed<Appointment[]>(() => {
     const paciente = this.paciente();
     if (!paciente) {
       return [];
     }
-    return CITAS_DE_MUESTRA.filter((c) => c.patientId === paciente.patientId).sort((a, b) =>
-      (b.date + b.startTime).localeCompare(a.date + a.startTime),
-    );
+    return masRecientePrimero(CITAS_DE_MUESTRA.filter((c) => c.patientId === paciente.patientId));
   });
 
   escribir(valor: string): void {
-    this.cedula.set(valor.trim());
+    const escrito = valor.trim();
+    this.cedula.set(escrito);
+    this.errorCedula.set(errorDeFormato(escrito));
     this.listaAbierta.set(true);
     this.activa.set(-1);
     this.noEncontrada.set('');
@@ -116,6 +121,7 @@ export class HistorialPaciente {
 
   elegir(paciente: PacienteEncontrado): void {
     this.cedula.set(paciente.documentNumber);
+    this.errorCedula.set(null);
     this.paciente.set(paciente);
     this.noEncontrada.set('');
     this.listaAbierta.set(false);
@@ -126,6 +132,12 @@ export class HistorialPaciente {
   buscar(): void {
     const escrito = this.cedula();
     if (!escrito) {
+      return;
+    }
+    const error = errorParaBuscar(escrito);
+    if (error) {
+      this.errorCedula.set(error);
+      this.listaAbierta.set(false);
       return;
     }
     const exacto = PACIENTES_DE_MUESTRA.find((p) => p.documentNumber === escrito);
@@ -140,6 +152,7 @@ export class HistorialPaciente {
 
   limpiar(): void {
     this.cedula.set('');
+    this.errorCedula.set(null);
     this.paciente.set(null);
     this.noEncontrada.set('');
     this.listaAbierta.set(false);

@@ -34,7 +34,7 @@ describe('Shell', () => {
     expect(nav).toContain('Panel de Citas');
     expect(nav).toContain('Próximas Citas');
     expect(nav).toContain('Listar Citas');
-    expect(nav).not.toContain('Historial de Paciente');
+    expect(nav).toContain('Historial de Paciente');
     expect(nav).toContain('Configuración');
     expect(nav).not.toContain('Agendar Cita');
   });

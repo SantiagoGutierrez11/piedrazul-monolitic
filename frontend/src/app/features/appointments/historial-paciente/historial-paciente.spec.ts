@@ -67,6 +67,20 @@ describe('HistorialPaciente (diseño con datos de muestra)', () => {
     expect(page.querySelector('table')).toBeNull();
   });
 
+  it('rejects an id number with dots or letters without searching', () => {
+    const { fixture, pantalla, page } = render();
+
+    pantalla.escribir('1.061.234');
+    fixture.detectChanges();
+
+    expect(pantalla.sugerencias()).toEqual([]);
+    expect(page.querySelector('#cedula')!.classList).toContain('invalid');
+    expect(page.textContent).toContain('solo puede tener números');
+
+    pantalla.buscar();
+    expect(pantalla.noEncontrada()).toBe('');
+  });
+
   it('highlights the typed digits inside the suggested id number', () => {
     expect(resaltar('1061234567', '106')).toEqual({ coincide: '106', resto: '1234567' });
   });
