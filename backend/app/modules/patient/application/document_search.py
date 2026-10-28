@@ -7,6 +7,9 @@ la pantalla le sugiere pacientes cuya cédula empieza por lo que lleva escrito.
 import re
 
 from app.core.exceptions import ValidationError
+from app.core.security import Role
+from app.modules.patient.domain.entities import Patient
+from app.modules.patient.infrastructure.repository import PatientRepository
 
 # ---------------------------------------------------------------- Formato de la cédula (2.1)
 
@@ -51,3 +54,25 @@ def full_document(text: str) -> str:
     if len(document) < MIN_DIGITS:
         raise ValidationError(TOO_SHORT)
     return document
+
+
+# ---------------------------------------------------------------- Búsqueda (3.1)
+
+# Los mismos roles que consultan el historial de citas (subtarea 2.3, ver
+# appointment/application/patient_history.py): el paciente no busca a otros pacientes.
+SEARCH_ROLES = (Role.MEDICO, Role.AGENDADOR, Role.ADMINISTRADOR)
+
+
+class SearchPatientsByDocument:
+    def __init__(self, repository: PatientRepository):
+        self._repository = repository
+
+    def execute(self, text: str) -> list[Patient]:
+        """
+        Pacientes cuya cédula empieza por lo escrito, con la coincidencia exacta primero.
+        Con menos de 3 dígitos devuelve una lista vacía: todavía no se sugiere nada.
+        """
+        prefix = suggestion_prefix(text)
+        if prefix is None:
+            return []
+        return self._repository.find_by_document_prefix(prefix, MAX_SUGGESTIONS)

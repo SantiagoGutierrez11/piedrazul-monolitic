@@ -68,6 +68,26 @@ class RegisteredPatientResponse(CamelModel):
     email: str
 
 
+class PatientMatchResponse(CamelModel):
+    """Paciente sugerido al buscar por cédula: solo lo necesario para reconocerlo (E7-HU1, 2.2)."""
+
+    patient_id: int
+    full_name: str
+    document_type: DocumentType | None
+    document_number: str
+    phone: str
+
+    @classmethod
+    def from_entity(cls, patient: Patient) -> "PatientMatchResponse":
+        return cls(
+            patient_id=patient.patient_id,
+            full_name=patient.full_name,
+            document_type=patient.document_type,
+            document_number=patient.document_number or "",
+            phone=patient.phone,
+        )
+
+
 class PatientProfileResponse(CamelModel):
     patient_id: int
     full_name: str
