@@ -19,6 +19,8 @@
           autocomplete="off"
           placeholder="Ej. 1061234567"
           role="combobox"
+          [class.invalid]="errorCedula()"
+          aria-describedby="cedula-ayuda"
           aria-autocomplete="list"
           aria-controls="sugerencias"
           [attr.aria-expanded]="mostrarLista()"
@@ -68,8 +70,10 @@
         <button type="button" class="secondary" (click)="limpiar()">Limpiar</button>
       }
     </div>
-    <p class="buscador__ayuda">
-      @if (cedula() && cedula().length < minDigitos) {
+    <p id="cedula-ayuda" class="buscador__ayuda" [class.buscador__ayuda--error]="errorCedula()">
+      @if (errorCedula(); as error) {
+        {{ error }}
+      } @else if (cedula() && cedula().length < minDigitos) {
         {{ mensajes.pocosDigitos(minDigitos) }}
       } @else {
         Solo números, sin puntos ni espacios. Elige al paciente de la lista o pulsa Buscar.
@@ -118,11 +122,9 @@
           <table>
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Profesional</th>
-                <th>Servicio</th>
-                <th>Estado</th>
+                @for (columna of columnas; track columna) {
+                  <th>{{ columna }}</th>
+                }
               </tr>
             </thead>
             <tbody>
