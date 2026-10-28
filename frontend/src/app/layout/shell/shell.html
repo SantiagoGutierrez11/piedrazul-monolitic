@@ -56,6 +56,17 @@
         </a>
       }
 
+      @if (can('medico', 'agendador')) {
+        <a class="nav-item" routerLink="/appointments/historial" routerLinkActive="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="10" cy="10" r="6" />
+            <path d="m20 20-5.5-5.5" stroke-linecap="round" />
+            <path d="M10 7v3l2 1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Historial de Paciente
+        </a>
+      }
+
       @if (can('medico')) {
         <span class="nav-item disabled" title="Pendiente de implementar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
