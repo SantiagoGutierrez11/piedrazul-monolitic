@@ -61,7 +61,7 @@ El backend rechaza con **403** a cualquier otro rol, aunque llame directamente a
 - **Y** no se muestra ninguna tabla de historial
 
 **Escenario 3: Paciente registrado sin citas**
-- **Dado** que Laura Sánchez (CC 1062345678) está registrada pero no tiene citas
+- **Dado** que Camila Rojas (CC 1066789012) está registrada pero no tiene citas
 - **Cuando** busco su cédula
 - **Entonces** veo su ficha con *"0 citas registradas"*
 - **Y** el mensaje *"Sin citas registradas"* en lugar de la tabla
