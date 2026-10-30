@@ -43,6 +43,9 @@
       <div class="proxima">
         <p class="proxima__hora">{{ horaAmPm(cita.startTime) }}</p>
         <p class="proxima__paciente">{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</p>
+        @if (cita.patientDocument) {
+          <p class="proxima__cedula">{{ cita.patientDocument }}</p>
+        }
         <p class="proxima__servicio">{{ servicios[cita.serviceType] }}</p>
         @if (cita.reason) {
           <p class="proxima__motivo"><small>Motivo</small>{{ cita.reason }}</p>
@@ -69,7 +72,12 @@
           @if (franja.cita; as cita) {
             <span class="timeline__detalle">
               <strong>{{ cita.patientName ?? 'Paciente #' + cita.patientId }}</strong>
-              <small>{{ servicios[cita.serviceType] }}</small>
+              <small>
+                @if (cita.patientDocument) {
+                  <span class="cedula">{{ cita.patientDocument }}</span> ·
+                }
+                {{ servicios[cita.serviceType] }}
+              </small>
             </span>
             <span class="badge badge--{{ cita.status.toLowerCase() }}">{{
               cita.status === 'ATENDIDA' ? 'Atendida' : 'Pendiente'

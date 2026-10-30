@@ -15,6 +15,7 @@ function cita(id: number, date: string, hora: string): Appointment {
     patientId: id,
     patientName: `Paciente ${id}`,
     patientPhone: null,
+    patientDocument: `CC 106123456${id}`,
     doctorId: 1,
     doctorName: 'Dra. Laura Muñoz',
     serviceType: 'CONSULTA_GENERAL',
@@ -79,6 +80,8 @@ describe('ProximasCitas', () => {
     ]);
     expect(page.textContent).toContain('Próxima semana');
     expect(page.querySelector('thead')!.textContent).toContain('Profesional');
+    expect(page.querySelector('thead')!.textContent).toContain('Cédula');
+    expect(page.textContent).toContain('CC 1061234561');
   });
 
   it('asks for a single professional when the scheduler picks one', () => {

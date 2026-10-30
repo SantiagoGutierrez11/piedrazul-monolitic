@@ -9,10 +9,12 @@ from app.modules.identity.application.accounts import AccountDirectory
 from app.modules.identity.domain.ports import IdentityProvider
 from app.modules.identity.infrastructure.keycloak_provider import get_identity_provider
 from app.modules.patient.api.schemas import (
+    PatientMatchResponse,
     PatientProfileResponse,
     RegisterPatientRequest,
     RegisteredPatientResponse,
 )
+from app.modules.patient.application.document_search import SEARCH_ROLES, SearchPatientsByDocument
 from app.modules.patient.application.register_patient import RegisterPatient
 from app.modules.patient.infrastructure.repository import PatientRepository
 
@@ -37,6 +39,20 @@ def register(payload: RegisterPatientRequest, use_case: RegisterPatient = Depend
 @router.get("/count", dependencies=[Depends(require_role(Role.ADMINISTRADOR))])
 def count_patients(db: Session = Depends(get_db)):
     return {"total": PatientRepository(db).count()}
+
+
+@router.get(
+    "/search",
+    response_model=list[PatientMatchResponse],
+    dependencies=[Depends(require_role(*SEARCH_ROLES))],
+)
+def search_by_document(document: str, db: Session = Depends(get_db)):
+    """
+    Pacientes cuya cédula empieza por `document` (máximo 8), con la coincidencia exacta primero.
+    Lista vacía con menos de 3 dígitos; 400 si `document` tiene algo distinto de números.
+    """
+    patients = SearchPatientsByDocument(PatientRepository(db)).execute(document)
+    return [PatientMatchResponse.from_entity(patient) for patient in patients]
 
 
 @router.get("/me", response_model=PatientProfileResponse)

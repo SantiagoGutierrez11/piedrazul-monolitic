@@ -22,6 +22,7 @@ export interface Appointment {
   patientId: number;
   patientName: string | null;
   patientPhone: string | null;
+  patientDocument?: string | null; // "CC 1061234567"
   doctorId: number;
   doctorName: string;
   serviceType: ServiceType;

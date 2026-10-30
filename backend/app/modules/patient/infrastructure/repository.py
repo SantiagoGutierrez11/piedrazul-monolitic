@@ -34,6 +34,16 @@ class PatientRepository:
             )
         )
 
+    def find_by_document_prefix(self, prefix: str, limit: int) -> list[Patient]:
+        """Pacientes cuyo número de documento empieza por `prefix`; el más corto (exacto) primero."""
+        rows = self._db.scalars(
+            select(PatientModel)
+            .where(PatientModel.document_number.startswith(prefix, autoescape=True))
+            .order_by(func.length(PatientModel.document_number), PatientModel.document_number)
+            .limit(limit)
+        ).all()
+        return [self._to_entity(row) for row in rows]
+
     def find_by_user_id(self, user_id: str) -> Patient | None:
         return self._first(select(PatientModel).where(PatientModel.user_id == user_id))
 
