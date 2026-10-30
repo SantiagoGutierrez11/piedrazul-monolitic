@@ -16,6 +16,8 @@ class AppointmentResponse(CamelModel):
     patient_id: int
     patient_name: str | None = None
     patient_phone: str | None = None
+    # Tipo y número juntos, por ejemplo "CC 1061234567".
+    patient_document: str | None = None
     doctor_id: int
     doctor_name: str
     service_type: ServiceType
@@ -48,6 +50,7 @@ class AppointmentResponse(CamelModel):
         if item.patient:
             response.patient_name = item.patient.full_name
             response.patient_phone = item.patient.phone
+            response.patient_document = item.patient.document or None
         return response
 
 

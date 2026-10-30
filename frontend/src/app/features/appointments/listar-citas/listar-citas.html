@@ -118,6 +118,7 @@
           <tr>
             <th>Hora</th>
             <th>Nombre del paciente</th>
+            <th>Cédula</th>
             <th>Teléfono de contacto</th>
             <th>Profesional</th>
             <th>Tipo de cita</th>
@@ -129,6 +130,7 @@
             <tr>
               <td class="hora">{{ apt.startTime.slice(0, 5) }}</td>
               <td>{{ apt.patientName ?? 'Paciente sin registrar' }}</td>
+              <td class="cedula">{{ apt.patientDocument ?? '—' }}</td>
               <td>{{ apt.patientPhone ?? '—' }}</td>
               <td>{{ apt.doctorName }}</td>
               <td>{{ apt.serviceType.replace('_', ' ') | titlecase }}</td>

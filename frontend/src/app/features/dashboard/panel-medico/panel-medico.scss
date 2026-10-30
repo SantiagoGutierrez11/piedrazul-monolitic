@@ -16,8 +16,14 @@
     font-weight: 600;
   }
 
-  &__servicio {
+  &__servicio,
+  &__cedula {
     color: var(--color-text-muted);
+  }
+
+  &__cedula {
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
   }
 
   &__motivo {

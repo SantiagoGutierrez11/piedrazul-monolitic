@@ -27,6 +27,7 @@ from app.modules.appointment.application.appointment_status import (
 from app.modules.appointment.application import export_csv
 from app.modules.appointment.application.export_csv import ExportAgendaCsv
 from app.modules.appointment.application.list_appointments import ListAppointments
+from app.modules.appointment.application.patient_history import HISTORY_ROLES, PatientHistoryQuery
 from app.modules.appointment.application.scheduling.patient_scheduling import (
     SchedulePatientAppointment,
 )
@@ -134,6 +135,18 @@ def export_agenda_csv(
 )
 def list_by_patient(patient_id: int, use_case: ListAppointments = Depends(get_list_appointments)):
     return [AppointmentResponse.from_listing(item) for item in use_case.by_patient(patient_id)]
+
+
+@router.get("/patient/{patient_id}/history", response_model=list[AppointmentResponse])
+def patient_history(
+    patient_id: int,
+    user: CurrentUser = Depends(require_role(*HISTORY_ROLES)),
+    db: Session = Depends(get_db),
+    use_case: ListAppointments = Depends(get_list_appointments),
+):
+    """Historial completo del paciente (incluye canceladas), de la cita más reciente a la más antigua."""
+    query = PatientHistoryQuery(use_case, PatientDirectory(PatientRepository(db)))
+    return [AppointmentResponse.from_listing(item) for item in query.execute(user, patient_id)]
 
 
 @router.get(
