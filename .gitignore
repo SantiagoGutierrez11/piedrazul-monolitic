@@ -24,3 +24,6 @@ node_modules/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Sesiones de OWASP ZAP (pesan cientos de MB y guardan tráfico con tokens)
+docs/seguridad/*.session*

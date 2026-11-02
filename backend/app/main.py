@@ -1,7 +1,7 @@
 """Punto de entrada del monolito modular: crea la app y monta el router de cada módulo."""
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -33,6 +33,15 @@ app.add_middleware(
 
     expose_headers=["Content-Disposition"],
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Evita que el navegador "adivine" el tipo de las respuestas (hallazgo de OWASP ZAP)."""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
 
 app.include_router(appointment_router, prefix="/api/v1/appointments", tags=["Appointments"])
 app.include_router(configuration_router, prefix="/api/v1/configuration", tags=["Configuration"])
