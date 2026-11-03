@@ -1,9 +1,9 @@
 <div class="configuracion-global">
-  <p class="breadcrumb">Administración / Configuración / Global</p>
-  <h1>Configuración Global del Sistema</h1>
-  <p class="subtitle">
-    Defina la ventana de tiempo en semanas en la que los pacientes pueden agendar citas.
-  </p>
+  <app-page-header
+    ruta="Administración / Configuración / Global"
+    titulo="Configuración Global del Sistema"
+    subtitulo="Defina la ventana de tiempo en semanas en la que los pacientes pueden agendar citas."
+  />
 
   <div class="card">
     <div class="field">
@@ -31,10 +31,10 @@
     </div>
 
     @if (message()) {
-      <p class="alert ok">{{ message() }}</p>
+      <app-alert tono="ok">{{ message() }}</app-alert>
     }
     @if (error()) {
-      <p class="alert error">{{ error() }}</p>
+      <app-alert tono="error">{{ error() }}</app-alert>
     }
   </div>
 </div>

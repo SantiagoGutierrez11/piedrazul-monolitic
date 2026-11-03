@@ -1,35 +1,21 @@
-<header class="panel-header">
-  <div>
-    <h1>Resumen General</h1>
-    <p class="subtitle">{{ hoy }}</p>
-  </div>
-  <div class="panel-header__acciones">
-    <a class="boton" routerLink="/appointments/proximas">Ver próximas citas</a>
-    <a class="boton secondary" routerLink="/configuration">Configuración del sistema</a>
-  </div>
-</header>
+<app-page-header titulo="Resumen General" [subtitulo]="hoy">
+  <a class="boton" routerLink="/appointments/proximas">Ver próximas citas</a>
+  <a class="boton secondary" routerLink="/configuration">Configuración del sistema</a>
+</app-page-header>
 
 @if (error()) {
-  <p class="alert error" role="alert">{{ error() }}</p>
+  <app-alert tono="error">{{ error() }}</app-alert>
 }
 
 <section class="stats">
-  <div class="card stat">
-    <small>Total pacientes</small>
-    <strong>{{ pacientes() ?? '—' }}</strong>
-  </div>
-  <div class="card stat">
-    <small>Citas hoy</small>
-    <strong>{{ resumen()?.today ?? '—' }}</strong>
-  </div>
-  <div class="card stat">
-    <small>Profesionales activos</small>
-    <strong class="ok">{{ profesionales()?.length ?? '—' }}</strong>
-  </div>
-  <div class="card stat">
-    <small>Citas pendientes</small>
-    <strong class="warn">{{ resumen()?.pending ?? '—' }}</strong>
-  </div>
+  <app-stat-card etiqueta="Total pacientes" [valor]="pacientes() ?? '—'" />
+  <app-stat-card etiqueta="Citas hoy" [valor]="resumen()?.today ?? '—'" />
+  <app-stat-card
+    etiqueta="Profesionales activos"
+    [valor]="profesionales()?.length ?? '—'"
+    tono="ok"
+  />
+  <app-stat-card etiqueta="Citas pendientes" [valor]="resumen()?.pending ?? '—'" tono="warn" />
 </section>
 
 <section class="card bloque profesionales">
@@ -38,7 +24,7 @@
     <a class="link" routerLink="/configuration/profesional">Editar horarios</a>
   </h2>
   @if (profesionales() === null) {
-    <p class="vacio">Cargando profesionales...</p>
+    <app-empty-state>Cargando profesionales...</app-empty-state>
   } @else {
     <div class="table-scroll">
       <table>

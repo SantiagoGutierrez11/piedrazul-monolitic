@@ -6,6 +6,8 @@ import { ConfigurationService } from '../services/configuration.service';
 import { DoctorScheduleItem } from '../models/configuration.model';
 import { MedicalStaffService } from '../../medical-staff/services/medical-staff.service';
 import { Doctor } from '../../medical-staff/models/doctor.model';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 interface DayOption {
   dayOfWeek: number;
@@ -26,7 +28,7 @@ function allDays(): DayOption[] {
 @Component({
   selector: 'app-configuracion-profesional',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Alert, PageHeader],
   templateUrl: './configuracion-profesional.html',
   styleUrl: './configuracion-profesional.scss',
 })

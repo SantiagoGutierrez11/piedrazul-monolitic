@@ -1,6 +1,7 @@
 # shared
 
-Componentes, pipes y directivas reutilizables por más de una feature (spinner de carga,
-tabla paginada genérica, badge de estado de cita, etc.). Todavía no hay nada aquí porque
-en el microservicio original ese código estaba duplicado dentro de cada página — al
-migrar, si dos personas necesitan el mismo widget, muévanlo aquí en vez de copiarlo.
+Utilidades sin interfaz que usan varias funcionalidades: formato de fechas en español
+(`fechas.ts`) y mensajes de error del backend (`error-messages.ts`).
+
+Los componentes visuales reutilizables no van aquí sino en `../ui/`, según su nivel de
+Atomic Design.

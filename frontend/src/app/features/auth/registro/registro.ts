@@ -7,10 +7,13 @@ import { mensajeDeError } from '../../../shared/error-messages';
 import { GENEROS, Genero, TIPOS_DOCUMENTO, TipoDocumento } from '../models/registro.model';
 import { RegistroService } from '../services/registro.service';
 import { Campo, formularioValido, hoyLocal, validarCampo } from './registro.validaciones';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { FormField } from '../../../ui/molecules/form-field/form-field';
+import { AuthLayout } from '../../../ui/templates/auth-layout/auth-layout';
 
 @Component({
   selector: 'app-registro',
-  imports: [ReactiveFormsModule, RouterLink, NgTemplateOutlet],
+  imports: [ReactiveFormsModule, RouterLink, NgTemplateOutlet, Alert, FormField, AuthLayout],
   templateUrl: './registro.html',
   styleUrls: ['../auth-page.scss', './registro.scss'],
 })

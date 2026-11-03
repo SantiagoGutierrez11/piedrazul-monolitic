@@ -1,18 +1,12 @@
-<header class="panel-header">
-  <div>
-    <h1>{{ titulo() }}</h1>
-    <p class="subtitle">{{ fechaTexto() }}</p>
-  </div>
-  <div class="panel-header__acciones">
-    <a class="boton" routerLink="/appointments/proximas">Ver próximas citas</a>
-    <button type="button" disabled title="Pendiente de implementar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M12 5v14M5 12h14" stroke-linecap="round" />
-      </svg>
-      Registrar nueva cita
-    </button>
-  </div>
-</header>
+<app-page-header [titulo]="titulo()" [subtitulo]="fechaTexto()">
+  <a class="boton" routerLink="/appointments/proximas">Ver próximas citas</a>
+  <button type="button" disabled title="Pendiente de implementar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+    </svg>
+    Registrar nueva cita
+  </button>
+</app-page-header>
 
 @if (proxima(); as cita) {
   <section class="card banner">
@@ -24,18 +18,9 @@
 }
 
 <section class="stats">
-  <div class="card stat">
-    <small>Citas {{ fecha() === hoy ? 'hoy' : 'del día' }}</small>
-    <strong>{{ total() }}</strong>
-  </div>
-  <div class="card stat">
-    <small>Agendadas</small>
-    <strong class="ok">{{ activas().length }}</strong>
-  </div>
-  <div class="card stat">
-    <small>Canceladas</small>
-    <strong class="danger">{{ canceladas() }}</strong>
-  </div>
+  <app-stat-card [etiqueta]="'Citas ' + (fecha() === hoy ? 'hoy' : 'del día')" [valor]="total()" />
+  <app-stat-card etiqueta="Agendadas" [valor]="activas().length" tono="ok" />
+  <app-stat-card etiqueta="Canceladas" [valor]="canceladas()" tono="danger" />
 </section>
 
 <div class="filtros">
@@ -55,17 +40,17 @@
 </div>
 
 @if (aviso()) {
-  <p class="alert ok" role="status">{{ aviso() }}</p>
+  <app-alert tono="ok">{{ aviso() }}</app-alert>
 }
 @if (error()) {
-  <p class="alert error" role="alert">{{ error() }}</p>
+  <app-alert tono="error">{{ error() }}</app-alert>
 }
 
 <section class="card bloque">
   @if (citas() === null) {
-    <p class="vacio">Cargando la agenda...</p>
+    <app-empty-state>Cargando la agenda...</app-empty-state>
   } @else if (citas()!.length === 0) {
-    <p class="vacio">No hay citas para esta fecha.</p>
+    <app-empty-state>No hay citas para esta fecha.</app-empty-state>
   } @else {
     <div class="table-scroll">
       <table>
@@ -91,9 +76,9 @@
               <td>{{ cita.doctorName }}</td>
               <td>{{ servicios[cita.serviceType] }}</td>
               <td>
-                <span class="badge badge--{{ cita.status.toLowerCase() }}">{{
+                <app-status-badge [estado]="cita.status">{{
                   estados[cita.status]
-                }}</span>
+                }}</app-status-badge>
               </td>
               <td class="acciones">
                 <button type="button" class="secondary" disabled title="Pendiente de implementar">

@@ -3,11 +3,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfigurationService } from '../services/configuration.service';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 @Component({
   selector: 'app-configuracion-global',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Alert, PageHeader],
   templateUrl: './configuracion-global.html',
   styleUrl: './configuracion-global.scss',
 })

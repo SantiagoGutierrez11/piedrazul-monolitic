@@ -1,7 +1,9 @@
 <div class="listar-citas">
-  <p class="breadcrumb">Administración / Listado de Citas</p>
-  <h1>Listado de Citas</h1>
-  <p class="subtitle">Busca y filtra todas las citas médicas programadas.</p>
+  <app-page-header
+    ruta="Administración / Listado de Citas"
+    titulo="Listado de Citas"
+    subtitulo="Busca y filtra todas las citas médicas programadas."
+  />
 
   <div class="card filtros">
     <div class="filtro filtro--profesional">
@@ -94,23 +96,21 @@
   </div>
 
   @if (error()) {
-    <p class="alert error">{{ error() }}</p>
+    <app-alert tono="error">{{ error() }}</app-alert>
   }
 
   @if (avisoExportacion()) {
-    <p class="alert aviso">{{ avisoExportacion() }}</p>
+    <app-alert tono="aviso">{{ avisoExportacion() }}</app-alert>
   }
 
-  
-
   @if (exportacionExitosa()) {
-    <p class="alert ok">{{ exportacionExitosa() }}</p>
+    <app-alert tono="ok">{{ exportacionExitosa() }}</app-alert>
   }
 
   @if (loading()) {
-    <div class="card empty-state">Cargando citas...</div>
+    <app-empty-state tarjeta>Cargando citas...</app-empty-state>
   } @else if (searched() && appointments().length === 0) {
-    <div class="card empty-state">No hay citas para los filtros seleccionados.</div>
+    <app-empty-state tarjeta>No hay citas para los filtros seleccionados.</app-empty-state>
   } @else if (appointments().length > 0) {
     <div class="card resultados">
       <table>
@@ -135,9 +135,9 @@
               <td>{{ apt.doctorName }}</td>
               <td>{{ apt.serviceType.replace('_', ' ') | titlecase }}</td>
               <td>
-                <span class="badge badge--{{ apt.status.toLowerCase() }}">
+                <app-status-badge [estado]="apt.status">
                   {{ apt.status | titlecase }}
-                </span>
+                </app-status-badge>
               </td>
             </tr>
           }
@@ -145,7 +145,9 @@
       </table>
 
       <div class="resultados__pie">
-        <span>Total de citas encontradas: <strong>{{ appointments().length }}</strong></span>
+        <span
+          >Total de citas encontradas: <strong>{{ appointments().length }}</strong></span
+        >
 
         @if (totalPages() > 1) {
           <span class="paginacion">

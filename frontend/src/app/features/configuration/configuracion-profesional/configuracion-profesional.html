@@ -1,7 +1,9 @@
 <div class="configuracion-profesional">
-  <p class="breadcrumb">Administración / Configuración / Profesional</p>
-  <h1>Configuración de Disponibilidad del Profesional</h1>
-  <p class="subtitle">Defina los días, horarios y duración de las citas para cada profesional.</p>
+  <app-page-header
+    ruta="Administración / Configuración / Profesional"
+    titulo="Configuración de Disponibilidad del Profesional"
+    subtitulo="Defina los días, horarios y duración de las citas para cada profesional."
+  />
 
   <div class="card">
     <div class="field">
@@ -94,10 +96,10 @@
     </div>
 
     @if (message()) {
-      <p class="alert ok">{{ message() }}</p>
+      <app-alert tono="ok">{{ message() }}</app-alert>
     }
     @if (error()) {
-      <p class="alert error">{{ error() }}</p>
+      <app-alert tono="error">{{ error() }}</app-alert>
     }
   </div>
 </div>

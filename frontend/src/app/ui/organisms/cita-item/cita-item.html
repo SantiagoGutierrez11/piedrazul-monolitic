@@ -9,27 +9,40 @@
   <span class="cita__datos">
     <strong>{{ fechaLarga(cita().date) }}</strong>
     <span>
-      {{ horaAmPm(cita().startTime) }} · {{ cita().doctorName }}, {{ servicios[cita().serviceType] }}
+      {{ horaAmPm(cita().startTime) }} · {{ cita().doctorName }},
+      {{ servicios[cita().serviceType] }}
     </span>
   </span>
 
-  <span class="badge" [class]="'badge--' + cita().status.toLowerCase()">
+  <app-status-badge [estado]="cita().status">
     @switch (cita().status) {
       @case ('CANCELADA') {
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
           <circle cx="12" cy="12" r="9" />
           <path d="M9 9l6 6M15 9l-6 6" stroke-linecap="round" />
         </svg>
       }
       @default {
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
           <circle cx="12" cy="12" r="9" />
           <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       }
     }
     {{ estados[cita().status] }}
-  </span>
+  </app-status-badge>
 
   @if (cancelable()) {
     <button type="button" class="cancelar" (click)="cancelar.emit(cita())">Cancelar</button>

@@ -1,8 +1,8 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AuthUser, Role } from '../../core/auth/auth.models';
-import { AuthService } from '../../core/auth/auth.service';
+import { AuthUser, Role } from '../../../core/auth/auth.models';
+import { AuthService } from '../../../core/auth/auth.service';
 import { Shell } from './shell';
 
 function renderFor(roles: Role[], fullName = 'Admin Sistema'): HTMLElement {

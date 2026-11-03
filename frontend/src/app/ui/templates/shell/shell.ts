@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ROLE_LABELS, Role } from '../../core/auth/auth.models';
-import { AuthService } from '../../core/auth/auth.service';
+import { ROLE_LABELS, Role } from '../../../core/auth/auth.models';
+import { AuthService } from '../../../core/auth/auth.service';
 
 // Estructura de las pantallas internas: barra lateral según el rol y el contenido de la ruta.
 @Component({

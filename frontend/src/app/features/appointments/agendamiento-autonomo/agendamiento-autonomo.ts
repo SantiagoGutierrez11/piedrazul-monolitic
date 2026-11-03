@@ -22,9 +22,11 @@ import {
   ServiceType,
 } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
+import { Alert } from '../../../ui/atoms/alert/alert';
 
 const DESCRIPCIONES: Record<ServiceType, string> = {
-  CONSULTA_GENERAL: 'Valoración médica general. Desde aquí el médico puede remitirte a otros servicios.',
+  CONSULTA_GENERAL:
+    'Valoración médica general. Desde aquí el médico puede remitirte a otros servicios.',
   FISIOTERAPIA: 'Rehabilitación física y terapia del movimiento.',
   QUIROPRAXIA: 'Ajustes de columna y articulaciones para aliviar el dolor.',
   TERAPIA_NEURAL: 'Tratamiento del dolor y la inflamación con terapia neural.',
@@ -43,7 +45,7 @@ interface DiaCalendario {
 // aplica el backend; aquí solo se ofrecen las opciones que el backend reporta como válidas.
 @Component({
   selector: 'app-agendamiento-autonomo',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, Alert],
   templateUrl: './agendamiento-autonomo.html',
   styleUrl: './agendamiento-autonomo.scss',
 })
