@@ -1,24 +1,20 @@
-<div class="auth-page">
-  <header class="auth-brand">
-    <span class="brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path
-          d="M12 20s-7-4.35-7-9a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 4.65-7 9-7 9Z"
-          stroke-linejoin="round"
-        />
-        <path d="M6 12.5h3l1.5-2.5 2 4 1.5-2.5h3" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </span>
-    <strong>Piedrazul</strong>
-    <small>Citas Médicas</small>
-  </header>
-
+<app-auth-layout subtitulo="Citas Médicas">
   <section class="auth-card login-card">
     <h1 class="titulo">Iniciar sesión</h1>
 
     <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
-      <div class="field">
-        <label for="email">Correo electrónico <span class="required">*</span></label>
+      <app-form-field
+        etiqueta="Correo electrónico"
+        idControl="email"
+        obligatorio
+        [error]="
+          mostrarError('email')
+            ? form.controls.email.hasError('required')
+              ? 'El correo electrónico es obligatorio'
+              : 'Ingresa un correo válido, por ejemplo nombre@correo.com'
+            : ''
+        "
+      >
         <input
           id="email"
           type="email"
@@ -27,23 +23,14 @@
           autocomplete="username"
           [class.invalid]="mostrarError('email')"
         />
-        @if (mostrarError('email')) {
-          <p class="field-error">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7.5v5.5M12 16.5v.01" stroke-linecap="round" />
-            </svg>
-            {{
-              form.controls.email.hasError('required')
-                ? 'El correo electrónico es obligatorio'
-                : 'Ingresa un correo válido, por ejemplo nombre@correo.com'
-            }}
-          </p>
-        }
-      </div>
+      </app-form-field>
 
-      <div class="field">
-        <label for="password">Contraseña <span class="required">*</span></label>
+      <app-form-field
+        etiqueta="Contraseña"
+        idControl="password"
+        obligatorio
+        [error]="mostrarError('password') ? 'La contraseña es obligatoria' : ''"
+      >
         <div class="password-input">
           <input
             id="password"
@@ -68,16 +55,7 @@
             </svg>
           </button>
         </div>
-        @if (mostrarError('password')) {
-          <p class="field-error">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7.5v5.5M12 16.5v.01" stroke-linecap="round" />
-            </svg>
-            La contraseña es obligatoria
-          </p>
-        }
-      </div>
+      </app-form-field>
 
       <div class="options">
         <label class="checkbox">
@@ -88,10 +66,10 @@
       </div>
 
       @if (aviso()) {
-        <p class="alert info">{{ aviso() }}</p>
+        <app-alert tono="info">{{ aviso() }}</app-alert>
       }
       @if (error()) {
-        <p class="alert error" role="alert">{{ error() }}</p>
+        <app-alert tono="error">{{ error() }}</app-alert>
       }
 
       <button type="submit" class="submit" [disabled]="enviando()">
@@ -100,7 +78,5 @@
     </form>
   </section>
 
-  <p class="auth-footer">
-    ¿No tienes cuenta?<a class="link" routerLink="/registro">Regístrate</a>
-  </p>
-</div>
+  <p class="auth-footer">¿No tienes cuenta?<a class="link" routerLink="/registro">Regístrate</a></p>
+</app-auth-layout>

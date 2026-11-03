@@ -1,28 +1,18 @@
-<header class="panel-header">
-  <div>
-    <h1>Próximas citas</h1>
-    <p class="subtitle">{{ periodo() || 'Citas agendadas desde hoy, semana por semana' }}</p>
-  </div>
-</header>
+<app-page-header
+  titulo="Próximas citas"
+  [subtitulo]="periodo() || 'Citas agendadas desde hoy, semana por semana'"
+/>
 
 <section class="stats">
-  <div class="card stat">
-    <small>Próximas citas</small>
-    <strong>{{ reporte()?.total ?? '—' }}</strong>
-  </div>
-  <div class="card stat">
-    <small>Esta semana</small>
-    <strong class="ok">{{ reporte() ? estaSemana() : '—' }}</strong>
-  </div>
-  <div class="card stat">
-    <small>Semana con más citas</small>
-    @if (semanaPico(); as pico) {
-      <strong class="warn">{{ pico.total }}</strong>
+  <app-stat-card etiqueta="Próximas citas" [valor]="reporte()?.total ?? '—'" />
+  <app-stat-card etiqueta="Esta semana" [valor]="reporte() ? estaSemana() : '—'" tono="ok" />
+  @if (semanaPico(); as pico) {
+    <app-stat-card etiqueta="Semana con más citas" [valor]="pico.total" tono="warn">
       <span class="stat__detalle">{{ pico.rango }}</span>
-    } @else {
-      <strong>—</strong>
-    }
-  </div>
+    </app-stat-card>
+  } @else {
+    <app-stat-card etiqueta="Semana con más citas" valor="—" />
+  }
 </section>
 
 <div class="filtros">
@@ -48,11 +38,13 @@
 </div>
 
 @if (error()) {
-  <p class="alert error" role="alert">{{ error() }}</p>
+  <app-alert tono="error">{{ error() }}</app-alert>
 }
 
 @if (reporte() === null) {
-  <section class="card bloque"><p class="vacio">Cargando las próximas citas...</p></section>
+  <section class="card bloque">
+    <app-empty-state>Cargando las próximas citas...</app-empty-state>
+  </section>
 } @else if (vista().length > 0) {
   <section class="card bloque">
     <h2 class="bloque__titulo">Citas por semana</h2>
@@ -77,12 +69,14 @@
   @for (semana of vista(); track semana.inicio) {
     <section class="card bloque detalle" [id]="'semana-' + semana.inicio">
       <h2 class="bloque__titulo">
-        <span>{{ semana.etiqueta }} <small>· {{ semana.rango }}</small></span>
+        <span
+          >{{ semana.etiqueta }} <small>· {{ semana.rango }}</small></span
+        >
         <span class="contador">{{ semana.total }} {{ semana.total === 1 ? 'cita' : 'citas' }}</span>
       </h2>
 
       @if (semana.total === 0) {
-        <p class="vacio">No hay citas agendadas esta semana.</p>
+        <app-empty-state>No hay citas agendadas esta semana.</app-empty-state>
       } @else {
         <div class="table-scroll">
           <table>
@@ -115,9 +109,9 @@
                     }
                     <td>{{ servicios[cita.serviceType] }}</td>
                     <td>
-                      <span class="badge badge--{{ cita.status.toLowerCase() }}">{{
+                      <app-status-badge [estado]="cita.status">{{
                         estados[cita.status]
-                      }}</span>
+                      }}</app-status-badge>
                     </td>
                   </tr>
                 }

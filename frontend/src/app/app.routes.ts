@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
 import { authGuard, guestGuard, roleGuard } from './core/guards/auth-guards';
-import { Shell } from './layout/shell/shell';
+import { Shell } from './ui/templates/shell/shell';
 
 export const routes: Routes = [
   {
@@ -24,11 +24,13 @@ export const routes: Routes = [
       {
         path: 'paciente',
         canActivate: [roleGuard(['paciente'])],
-        loadChildren: () => import('./features/patient/patient.routes').then((m) => m.patientRoutes),
+        loadChildren: () =>
+          import('./features/patient/patient.routes').then((m) => m.patientRoutes),
       },
       {
         path: 'panel',
-        loadChildren: () => import('./features/dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
+        loadChildren: () =>
+          import('./features/dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
       },
       {
         path: 'appointments',

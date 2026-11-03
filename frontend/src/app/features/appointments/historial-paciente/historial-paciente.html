@@ -1,7 +1,9 @@
 <div class="historial">
-  <p class="breadcrumb">Pacientes / Historial de citas</p>
-  <h1>Historial de paciente</h1>
-  <p class="subtitle">Consulta todas las citas de un paciente a partir de su número de cédula.</p>
+  <app-page-header
+    ruta="Pacientes / Historial de citas"
+    titulo="Historial de paciente"
+    subtitulo="Consulta todas las citas de un paciente a partir de su número de cédula."
+  />
 
   <!-- 1.1 Búsqueda por cédula + 1.2 Autocompletado -->
   <section class="card buscador">
@@ -30,7 +32,12 @@
 
         @if (mostrarLista()) {
           <!-- mousedown evita que el input pierda el foco antes del clic en una sugerencia -->
-          <ul id="sugerencias" class="sugerencias" role="listbox" (mousedown)="$event.preventDefault()">
+          <ul
+            id="sugerencias"
+            class="sugerencias"
+            role="listbox"
+            (mousedown)="$event.preventDefault()"
+          >
             @for (opcion of sugerencias(); track opcion.patientId; let i = $index) {
               <li
                 [id]="'sugerencia-' + i"
@@ -43,7 +50,8 @@
                 <span class="sugerencia__nombre">{{ opcion.fullName }}</span>
                 @let partes = resaltar(opcion.documentNumber, cedula());
                 <span class="sugerencia__documento">
-                  {{ opcion.documentType }} <mark>{{ partes.coincide }}</mark>{{ partes.resto }}
+                  {{ opcion.documentType }} <mark>{{ partes.coincide }}</mark
+                  >{{ partes.resto }}
                 </span>
               </li>
             } @empty {
@@ -60,7 +68,13 @@
       </div>
 
       <button type="button" (click)="buscar()" [disabled]="buscando()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" stroke-linecap="round" />
         </svg>
@@ -82,7 +96,7 @@
   </section>
 
   @if (error()) {
-    <p class="alert error" role="alert">{{ error() }}</p>
+    <app-alert tono="error">{{ error() }}</app-alert>
   }
 
   <!-- 1.4 Mensajes de estado vacío -->
@@ -145,9 +159,9 @@
                   <td>{{ cita.doctorName }}</td>
                   <td>{{ servicios[cita.serviceType] }}</td>
                   <td>
-                    <span class="badge badge--{{ cita.status.toLowerCase() }}">{{
+                    <app-status-badge [estado]="cita.status">{{
                       estados[cita.status]
-                    }}</span>
+                    }}</app-status-badge>
                   </td>
                 </tr>
               }

@@ -1,10 +1,5 @@
 <div class="inicio">
-  <header class="panel-header">
-    <div>
-      <h1>Hola, {{ nombre() }}</h1>
-      <p class="subtitle">Hoy es {{ hoy }}.</p>
-    </div>
-
+  <app-page-header grande [titulo]="'Hola, ' + nombre()" [subtitulo]="'Hoy es ' + hoy + '.'">
     <a class="boton agendar" routerLink="/appointments/agendar">
       <svg
         viewBox="0 0 24 24"
@@ -18,13 +13,13 @@
       </svg>
       Agendar una cita
     </a>
-  </header>
+  </app-page-header>
 
   @if (estado.aviso()) {
-    <p class="alert ok" role="status">{{ estado.aviso() }}</p>
+    <app-alert tono="ok">{{ estado.aviso() }}</app-alert>
   }
   @if (estado.error()) {
-    <p class="alert error" role="alert">{{ estado.error() }}</p>
+    <app-alert tono="error">{{ estado.error() }}</app-alert>
   }
 
   <div class="columnas">
@@ -33,7 +28,7 @@
       <h2 class="bloque__titulo">Tu próxima cita</h2>
 
       @if (estado.citas() === null) {
-        <p class="vacio">Cargando tus citas...</p>
+        <app-empty-state>Cargando tus citas...</app-empty-state>
       } @else if (proxima(); as cita) {
         <div class="proxima">
           <p class="proxima__fecha">{{ fechaLarga(cita.date) }}</p>
@@ -81,10 +76,10 @@
           </button>
         </div>
       } @else {
-        <p class="vacio">
+        <app-empty-state>
           No tienes citas programadas.
           <a class="link" routerLink="/appointments/agendar">Agenda una aquí</a>.
-        </p>
+        </app-empty-state>
       }
     </section>
 
@@ -95,7 +90,7 @@
         <app-cita-item [cita]="cita" />
       } @empty {
         @if (estado.citas() !== null) {
-          <p class="vacio">Aún no tienes citas anteriores.</p>
+          <app-empty-state>Aún no tienes citas anteriores.</app-empty-state>
         }
       }
     </section>

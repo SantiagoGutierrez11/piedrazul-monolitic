@@ -4,10 +4,13 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { mensajeDeError } from '../../../shared/error-messages';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { FormField } from '../../../ui/molecules/form-field/form-field';
+import { AuthLayout } from '../../../ui/templates/auth-layout/auth-layout';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Alert, FormField, AuthLayout],
   templateUrl: './login.html',
   styleUrls: ['../auth-page.scss', './login.scss'],
 })
@@ -66,5 +69,4 @@ export class Login {
       },
     });
   }
-
 }

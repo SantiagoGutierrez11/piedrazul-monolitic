@@ -14,6 +14,9 @@ import {
   sugerirDesde,
 } from './historial-paciente.reglas';
 import { HistorialPacienteService, PacienteEncontrado } from './historial-paciente.service';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { StatusBadge } from '../../../ui/atoms/status-badge/status-badge';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 // Espera entre teclas antes de pedir sugerencias, para no consultar el backend con cada dígito.
 export const ESPERA_SUGERENCIAS_MS = 250;
@@ -47,6 +50,7 @@ export function resaltar(documento: string, escrito: string): { coincide: string
 // y el administrador.
 @Component({
   selector: 'app-historial-paciente',
+  imports: [Alert, StatusBadge, PageHeader],
   templateUrl: './historial-paciente.html',
   styleUrl: './historial-paciente.scss',
 })

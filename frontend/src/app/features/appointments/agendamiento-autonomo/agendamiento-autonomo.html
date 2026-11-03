@@ -341,7 +341,7 @@
       }
 
       @if (error()) {
-        <p class="alert error" role="alert">{{ error() }}</p>
+        <app-alert tono="error">{{ error() }}</app-alert>
       }
 
       <div class="navegacion">
@@ -361,7 +361,7 @@
         }
       </div>
     } @else if (error()) {
-      <p class="alert error" role="alert">{{ error() }}</p>
+      <app-alert tono="error">{{ error() }}</app-alert>
     }
   }
 </div>

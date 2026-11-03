@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { ConfirmDialog } from '../../../ui/organisms/confirm-dialog/confirm-dialog';
 import { mensajeDeError } from '../../../shared/error-messages';
 import { fechaCompleta, horaAmPm, hoyIso } from '../../../shared/fechas';
 import {
@@ -12,13 +12,27 @@ import {
 import { AppointmentService } from '../../appointments/services/appointment.service';
 import { Doctor } from '../../medical-staff/models/doctor.model';
 import { MedicalStaffService } from '../../medical-staff/services/medical-staff.service';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { StatusBadge } from '../../../ui/atoms/status-badge/status-badge';
+import { EmptyState } from '../../../ui/molecules/empty-state/empty-state';
+import { StatCard } from '../../../ui/molecules/stat-card/stat-card';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 const ACTIVAS = ['AGENDADA', 'REAGENDADA'];
 
 // Panel del agendador: agenda del día de todos los profesionales, con filtros y cancelación.
 @Component({
   selector: 'app-panel-agenda',
-  imports: [FormsModule, RouterLink, ConfirmDialog],
+  imports: [
+    FormsModule,
+    RouterLink,
+    ConfirmDialog,
+    Alert,
+    StatusBadge,
+    EmptyState,
+    StatCard,
+    PageHeader,
+  ],
   templateUrl: './panel-agenda.html',
   styleUrl: './panel-agenda.scss',
 })

@@ -13,6 +13,11 @@ import {
   UpcomingWeek,
 } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { StatusBadge } from '../../../ui/atoms/status-badge/status-badge';
+import { EmptyState } from '../../../ui/molecules/empty-state/empty-state';
+import { StatCard } from '../../../ui/molecules/stat-card/stat-card';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 export const OPCIONES_SEMANAS = [2, 4, 8];
 
@@ -64,7 +69,7 @@ function porDia(citas: Appointment[]): DiaConCitas[] {
 // Reporte de próximas citas por semana para el médico (solo las suyas), el agendador y el administrador.
 @Component({
   selector: 'app-proximas-citas',
-  imports: [FormsModule],
+  imports: [FormsModule, Alert, StatusBadge, EmptyState, StatCard, PageHeader],
   templateUrl: './proximas-citas.html',
   styleUrl: './proximas-citas.scss',
 })

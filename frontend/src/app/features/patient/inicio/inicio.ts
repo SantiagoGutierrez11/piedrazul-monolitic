@@ -1,18 +1,21 @@
 import { Component, OnInit, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
-import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { ConfirmDialog } from '../../../ui/organisms/confirm-dialog/confirm-dialog';
 import { fechaCompleta, fechaLarga, horaAmPm, hoyIso } from '../../../shared/fechas';
 import { SERVICE_LABELS } from '../../appointments/models/appointment.model';
-import { CitaItem } from '../cita-item/cita-item';
+import { CitaItem } from '../../../ui/organisms/cita-item/cita-item';
 import { CitasDelPaciente } from '../citas-del-paciente';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { EmptyState } from '../../../ui/molecules/empty-state/empty-state';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 const CITAS_EN_HISTORIAL = 5;
 
 // Pantalla principal del paciente: próxima cita, historial reciente y acceso al agendamiento.
 @Component({
   selector: 'app-inicio-paciente',
-  imports: [RouterLink, CitaItem, ConfirmDialog],
+  imports: [RouterLink, CitaItem, ConfirmDialog, Alert, EmptyState, PageHeader],
   providers: [CitasDelPaciente],
   templateUrl: './inicio.html',
   styleUrl: './inicio.scss',

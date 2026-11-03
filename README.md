@@ -201,9 +201,13 @@ defecto `America/Bogota`), aunque el contenedor corra en UTC.
 frontend/src/app/
 ├── core/                    # api-config.ts, auth/ (sesión y roles), interceptors/auth-interceptor.ts,
 │                            # guards/auth-guards.ts
-├── layout/shell/            # barra lateral según el rol del usuario
-├── shared/                  # fechas en español, mensajes de error y diálogo de confirmación
-└── features/
+├── shared/                  # fechas en español y mensajes de error (sin interfaz)
+├── ui/                      # Atomic Design: lo reutilizable, de lo más pequeño a lo más grande
+│   ├── atoms/               #   alert, status-badge
+│   ├── molecules/           #   form-field, page-header, stat-card, empty-state
+│   ├── organisms/           #   confirm-dialog, cita-item
+│   └── templates/           #   shell (barra lateral según el rol), auth-layout (login y registro)
+└── features/                # las páginas: cada pantalla se arma con piezas de ui/
     ├── appointments/
     │   ├── listar-citas/            <- Andrea
     │   ├── agendamiento-autonomo/   <- Leyder

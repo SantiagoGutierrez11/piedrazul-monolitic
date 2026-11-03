@@ -4,11 +4,13 @@ import {
   Appointment,
   SERVICE_LABELS,
   STATUS_LABELS,
-} from '../../appointments/models/appointment.model';
+} from '../../../features/appointments/models/appointment.model';
+import { StatusBadge } from '../../atoms/status-badge/status-badge';
 
 // Fila de una cita en las listas del paciente (historial y mis citas).
 @Component({
   selector: 'app-cita-item',
+  imports: [StatusBadge],
   templateUrl: './cita-item.html',
   styleUrl: './cita-item.scss',
 })

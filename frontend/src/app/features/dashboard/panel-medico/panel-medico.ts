@@ -8,6 +8,11 @@ import { Appointment, SERVICE_LABELS } from '../../appointments/models/appointme
 import { AppointmentService } from '../../appointments/services/appointment.service';
 import { Doctor, Slot } from '../../medical-staff/models/doctor.model';
 import { MedicalStaffService } from '../../medical-staff/services/medical-staff.service';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { StatusBadge } from '../../../ui/atoms/status-badge/status-badge';
+import { EmptyState } from '../../../ui/molecules/empty-state/empty-state';
+import { StatCard } from '../../../ui/molecules/stat-card/stat-card';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 interface Franja {
   hora: string; // HH:mm
@@ -19,7 +24,7 @@ const ACTIVAS = ['AGENDADA', 'REAGENDADA'];
 // Panel del médico: resumen del día, próxima cita y agenda por franjas.
 @Component({
   selector: 'app-panel-medico',
-  imports: [RouterLink],
+  imports: [RouterLink, Alert, StatusBadge, EmptyState, StatCard, PageHeader],
   templateUrl: './panel-medico.html',
   styleUrl: './panel-medico.scss',
 })

@@ -11,6 +11,10 @@ import { DoctorScheduleItem } from '../../configuration/models/configuration.mod
 import { ConfigurationService } from '../../configuration/services/configuration.service';
 import { Doctor } from '../../medical-staff/models/doctor.model';
 import { MedicalStaffService } from '../../medical-staff/services/medical-staff.service';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { EmptyState } from '../../../ui/molecules/empty-state/empty-state';
+import { StatCard } from '../../../ui/molecules/stat-card/stat-card';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 interface FilaProfesional {
   medico: Doctor;
@@ -25,7 +29,7 @@ const DIAS_CORTOS = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']; // 
 // Panel del administrador: indicadores generales, profesionales con su horario y parámetros.
 @Component({
   selector: 'app-panel-admin',
-  imports: [RouterLink],
+  imports: [RouterLink, Alert, EmptyState, StatCard, PageHeader],
   templateUrl: './panel-admin.html',
   styleUrl: './panel-admin.scss',
 })

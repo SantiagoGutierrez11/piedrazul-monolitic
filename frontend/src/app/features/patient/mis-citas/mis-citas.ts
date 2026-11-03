@@ -1,13 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
-import { CitaItem } from '../cita-item/cita-item';
+import { ConfirmDialog } from '../../../ui/organisms/confirm-dialog/confirm-dialog';
+import { CitaItem } from '../../../ui/organisms/cita-item/cita-item';
 import { CitasDelPaciente } from '../citas-del-paciente';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { EmptyState } from '../../../ui/molecules/empty-state/empty-state';
 
 // Todas las citas del paciente: las próximas (cancelables) y las anteriores.
 @Component({
   selector: 'app-mis-citas',
-  imports: [RouterLink, CitaItem, ConfirmDialog],
+  imports: [RouterLink, CitaItem, ConfirmDialog, Alert, EmptyState],
   providers: [CitasDelPaciente],
   template: `
     <div class="mis-citas">
@@ -15,25 +17,29 @@ import { CitasDelPaciente } from '../citas-del-paciente';
       <p class="subtitle">Consulta tus citas programadas y las que ya pasaron.</p>
 
       @if (estado.aviso()) {
-        <p class="alert ok" role="status">{{ estado.aviso() }}</p>
+        <app-alert tono="ok">{{ estado.aviso() }}</app-alert>
       }
       @if (estado.error()) {
-        <p class="alert error" role="alert">{{ estado.error() }}</p>
+        <app-alert tono="error">{{ estado.error() }}</app-alert>
       }
 
       <section class="card bloque">
         <h2 class="bloque__titulo">Próximas</h2>
         @for (cita of estado.proximas(); track cita.appointmentId) {
-          <app-cita-item [cita]="cita" [cancelable]="true" (cancelar)="estado.pedirCancelacion($event)" />
+          <app-cita-item
+            [cita]="cita"
+            [cancelable]="true"
+            (cancelar)="estado.pedirCancelacion($event)"
+          />
         } @empty {
-          <p class="vacio">
+          <app-empty-state>
             @if (estado.citas() === null) {
               Cargando tus citas...
             } @else {
               No tienes citas programadas.
               <a class="link" routerLink="/appointments/agendar">Agendar una cita</a>
             }
-          </p>
+          </app-empty-state>
         }
       </section>
 
@@ -43,7 +49,7 @@ import { CitasDelPaciente } from '../citas-del-paciente';
           <app-cita-item [cita]="cita" />
         } @empty {
           @if (estado.citas() !== null) {
-            <p class="vacio">Aún no tienes citas anteriores.</p>
+            <app-empty-state>Aún no tienes citas anteriores.</app-empty-state>
           }
         }
       </section>

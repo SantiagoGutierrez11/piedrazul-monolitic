@@ -6,6 +6,10 @@ import { AppointmentService } from '../services/appointment.service';
 import { Appointment, AppointmentStatus, ServiceType } from '../models/appointment.model';
 import { MedicalStaffService } from '../../medical-staff/services/medical-staff.service';
 import { Doctor } from '../../medical-staff/models/doctor.model';
+import { Alert } from '../../../ui/atoms/alert/alert';
+import { StatusBadge } from '../../../ui/atoms/status-badge/status-badge';
+import { EmptyState } from '../../../ui/molecules/empty-state/empty-state';
+import { PageHeader } from '../../../ui/molecules/page-header/page-header';
 
 const PAGE_SIZE = 10;
 
@@ -35,7 +39,7 @@ function descargar(archivo: Blob, nombre: string): void {
 @Component({
   selector: 'app-listar-citas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Alert, StatusBadge, EmptyState, PageHeader],
   templateUrl: './listar-citas.html',
   styleUrl: './listar-citas.scss',
 })
@@ -134,10 +138,6 @@ export class ListarCitas implements OnInit {
     this.mostrarFaltantes.set(false);
     this.error.set('');
     this.exportando.set(true);
-
-    
-
-
 
     this.appointmentService.exportCsv(doctorId, date).subscribe({
       next: (response) => {

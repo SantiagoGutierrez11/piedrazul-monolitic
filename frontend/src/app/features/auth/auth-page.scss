@@ -4,50 +4,6 @@
   display: block;
 }
 
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2.5rem 1rem;
-}
-
-.auth-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
-
-  .brand-mark {
-    display: grid;
-    place-items: center;
-    width: 3.25rem;
-    height: 3.25rem;
-    margin-bottom: 0.65rem;
-    border-radius: 14px;
-    background: var(--color-primary);
-    color: #fff;
-
-    svg {
-      width: 1.9rem;
-      height: 1.9rem;
-    }
-  }
-
-  strong {
-    font-size: 1.35rem;
-    font-weight: 700;
-  }
-
-  small {
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-  }
-}
-
 .auth-card {
   width: 100%;
   background: var(--color-surface);
@@ -95,12 +51,6 @@
     width: 1.15rem;
     height: 1.15rem;
   }
-}
-
-.field-error svg {
-  width: 0.95rem;
-  height: 0.95rem;
-  flex-shrink: 0;
 }
 
 .submit {
